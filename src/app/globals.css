@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@custom-variant dark (&:is(.dark *));
 
 @theme {
   --color-border: var(--border);
@@ -56,27 +55,6 @@
     --input: #fbcfe8;
     --ring: #be185d;
     --radius: 0.5rem;
-  }
-  .dark {
-    --background: #1c0218; /* Very deep dark pink/purple background */
-    --foreground: #fce7f3; /* Light pink text */
-    --card: #2e0529;
-    --card-foreground: #fce7f3;
-    --popover: #2e0529;
-    --popover-foreground: #fce7f3;
-    --primary: #f472b6; /* Pink 400 */
-    --primary-foreground: #4a044e;
-    --secondary: #4a044e; /* Pink 900 */
-    --secondary-foreground: #fbcfe8;
-    --muted: #4a044e;
-    --muted-foreground: #f472b6;
-    --accent: #831843;
-    --accent-foreground: #fce7f3;
-    --destructive: #fb7185;
-    --destructive-foreground: #1c0218;
-    --border: #831843;
-    --input: #831843;
-    --ring: #f472b6;
   }
 }
 

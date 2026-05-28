@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { BrandHero } from "@/components/BrandHero";
 import Link from "next/link";
 import { LuxereenCarousel } from "@/components/LuxereenCarousel";
+import { pickLatestBanner } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -47,10 +48,11 @@ export default async function ShopPage({
       .from("hero_banners")
       .select("*")
       .in("title", [desktopBannerTitle, mobileBannerTitle])
-      .eq("is_active", true);
-    
-    desktopBanner = bData?.find(b => b.title === desktopBannerTitle) || null;
-    mobileBanner = bData?.find(b => b.title === mobileBannerTitle) || null;
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    desktopBanner = pickLatestBanner(bData, desktopBannerTitle);
+    mobileBanner = pickLatestBanner(bData, mobileBannerTitle);
   }
 
   // Grouping Logic
@@ -102,7 +104,7 @@ export default async function ShopPage({
         {products && products.length > 0 ? (
           <>
             {brand === "luxereen_wears" ? (
-              <LuxereenCarousel title="New Arrivals" products={newArrivals} id="new-arrivals" />
+              <LuxereenCarousel title="New Arrival" products={newArrivals} id="new-arrivals" />
             ) : (
               renderSection("New Arrivals", newArrivals, "new-arrivals")
             )}

@@ -8,7 +8,6 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronDown } from "lucide-react";
-import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   const { items } = useCart();
@@ -58,8 +57,17 @@ export function Navbar() {
             </Link>
           </nav>
         </div>
-        <div className="flex items-center justify-end space-x-4">
-          <nav className="flex items-center space-x-2">              <ThemeToggle />            <Link href="/cart" className="relative p-2">
+        <div className="flex items-center justify-end space-x-2 md:space-x-4">
+          <button
+            type="button"
+            className="md:hidden p-2 rounded-md hover:bg-muted transition-colors"
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu className="h-6 w-6 text-foreground" />
+          </button>
+          <nav className="flex items-center space-x-2">
+            <Link href="/cart" className="relative p-2">
               <ShoppingBag className="h-6 w-6 text-foreground hover:text-primary transition-colors" />
               {itemCount > 0 && (
                 <Badge 
