@@ -22,30 +22,50 @@ type CarouselSlide = {
   isActive: boolean;
 };
 
-function buildCarouselSlides(products: Product[]): CarouselSlide[] {
-  if (!products.length) return [];
+const REFERENCE_LAYOUT_MIN = 5;
 
-  const featured = products[0];
-  let ordered = [...products];
-  let activeIndex = 0;
+function dedupeProducts(products: Product[]): Product[] {
+  const seen = new Set<string>();
+  return products.filter((product) => {
+    const id = String(product.id);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
 
-  if (products.length >= 5) {
-    // Reference layout: featured product sits in the center slot when enough real items exist.
-    activeIndex = 4;
-    const featuredIndex = ordered.findIndex((product) => product.id === featured.id);
-    const rotateBy = (featuredIndex - activeIndex + ordered.length) % ordered.length;
-    ordered = [...ordered.slice(rotateBy), ...ordered.slice(0, rotateBy)];
-  } else if (products.length > 1) {
-    // Avoid placing the featured item in the hidden first slot when only a few products exist.
-    ordered = [...products.slice(1), featured];
-    activeIndex = ordered.findIndex((product) => product.id === featured.id);
+function buildCarouselSlides(products: Product[]): { slides: CarouselSlide[]; isCompact: boolean } {
+  const unique = dedupeProducts(products);
+  if (!unique.length) return { slides: [], isCompact: true };
+
+  const isCompact = unique.length < REFERENCE_LAYOUT_MIN;
+
+  if (isCompact) {
+    return {
+      isCompact: true,
+      slides: unique.map((product, idx) => ({
+        product,
+        key: String(product.id),
+        isActive: idx === 0,
+      })),
+    };
   }
 
-  return ordered.map((product, idx) => ({
-    product,
-    key: String(product.id),
-    isActive: idx === activeIndex,
-  }));
+  const featured = unique[0];
+  let ordered = [...unique];
+  const activeIndex = 4;
+  const featuredIndex = ordered.findIndex((product) => product.id === featured.id);
+  const rotateBy = (featuredIndex - activeIndex + ordered.length) % ordered.length;
+  ordered = [...ordered.slice(rotateBy), ...ordered.slice(0, rotateBy)];
+
+  return {
+    isCompact: false,
+    slides: ordered.map((product, idx) => ({
+      product,
+      key: String(product.id),
+      isActive: idx === activeIndex,
+    })),
+  };
 }
 
 function buildCartPayload(product: Product) {
@@ -70,9 +90,11 @@ function buildCartPayload(product: Product) {
 
 const CarouselInstance = memo(function CarouselInstance({
   slides,
+  isCompact,
   onAddToCartRef,
 }: {
   slides: CarouselSlide[];
+  isCompact: boolean;
   onAddToCartRef: React.RefObject<(product: Product) => void>;
 }) {
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -80,6 +102,8 @@ const CarouselInstance = memo(function CarouselInstance({
   const nextRef = useRef<HTMLButtonElement | null>(null);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pauserRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isCompactRef = useRef(isCompact);
+  isCompactRef.current = isCompact;
 
   const getSlides = useCallback(() => Array.from(listRef.current?.querySelectorAll(".carousel__item") || []), []);
 
@@ -108,8 +132,17 @@ const CarouselInstance = memo(function CarouselInstance({
   );
 
   const prevSlide = useCallback(() => {
-    const index = getActiveIndex();
     const $slides = getSlides();
+    if (!$slides.length) return;
+
+    if (isCompactRef.current) {
+      const index = getActiveIndex();
+      const nextIndex = (index - 1 + $slides.length) % $slides.length;
+      activateSlide($slides[nextIndex]);
+      return;
+    }
+
+    const index = getActiveIndex();
     const $last = $slides[$slides.length - 1];
     if (!$last || !listRef.current) return;
     $last.remove();
@@ -118,8 +151,17 @@ const CarouselInstance = memo(function CarouselInstance({
   }, [activateSlide, getActiveIndex, getSlides]);
 
   const nextSlide = useCallback(() => {
-    const index = getActiveIndex();
     const $slides = getSlides();
+    if (!$slides.length) return;
+
+    if (isCompactRef.current) {
+      const index = getActiveIndex();
+      const nextIndex = (index + 1) % $slides.length;
+      activateSlide($slides[nextIndex]);
+      return;
+    }
+
+    const index = getActiveIndex();
     const $first = $slides[0];
     if (!$first || !listRef.current) return;
     $first.remove();
@@ -134,10 +176,11 @@ const CarouselInstance = memo(function CarouselInstance({
 
   const startAuto = useCallback(() => {
     pauseAuto();
+    if (isCompactRef.current && slides.length < 2) return;
     autoRef.current = setInterval(() => {
       nextSlide();
     }, 3000);
-  }, [nextSlide, pauseAuto]);
+  }, [nextSlide, pauseAuto, slides.length]);
 
   useEffect(() => {
     if (!slides.length) return;
@@ -154,9 +197,17 @@ const CarouselInstance = memo(function CarouselInstance({
     if (!list || !prevBtn || !nextBtn) return;
 
     const chooseSlide = (e: Event) => {
-      const max = window.matchMedia("screen and ( max-width: 600px)").matches ? 5 : 8;
       const target = e.target as HTMLElement | null;
       const $slide = target?.closest(".carousel__item") || null;
+      if (!$slide) return;
+
+      if (isCompactRef.current) {
+        pauseAuto();
+        activateSlide($slide);
+        return;
+      }
+
+      const max = window.matchMedia("screen and ( max-width: 600px)").matches ? 5 : 8;
       const index = getSlideIndex($slide);
       if (index < 3 || index > max) return;
       if (index === max) nextSlide();
@@ -230,7 +281,7 @@ const CarouselInstance = memo(function CarouselInstance({
   };
 
   return (
-    <section className="carousel">
+    <section className={`carousel${isCompact ? " carousel--compact" : ""}`}>
       <ul className="carousel__list" ref={listRef} data-slide-count={slides.length}>
         {slides.map(({ product, key, isActive }) => {
           const imageUrl = product.image_urls?.[0];
@@ -287,28 +338,29 @@ const CarouselInstance = memo(function CarouselInstance({
     </section>
   );
 }, (prev, next) => {
-  const prevKeys = prev.slides.map((slide) => slide.key).join("|");
-  const nextKeys = next.slides.map((slide) => slide.key).join("|");
-  return prevKeys === nextKeys;
+  return (
+    prev.isCompact === next.isCompact &&
+    prev.slides.map((slide) => slide.key).join("|") === next.slides.map((slide) => slide.key).join("|")
+  );
 });
 
 export function LuxereenCarousel({ products, title, id }: { products: Product[]; title: string; id?: string }) {
   const { addToCart } = useCart();
   const onAddToCartRef = useRef<(product: Product) => void>(() => {});
-  const slides = buildCarouselSlides(products);
+  const { slides, isCompact } = buildCarouselSlides(products);
 
   onAddToCartRef.current = (product: Product) => {
     addToCart(buildCartPayload(product));
   };
 
-  if (!products || products.length === 0) {
+  if (!slides.length) {
     return null;
   }
 
   return (
     <div id={id} className="mb-20 pt-20 -mt-20">
       <h2 className="text-2xl md:text-3xl font-serif mb-8 pb-4 border-b border-border/50 uppercase tracking-widest">{title}</h2>
-      <CarouselInstance slides={slides} onAddToCartRef={onAddToCartRef} />
+      <CarouselInstance slides={slides} isCompact={isCompact} onAddToCartRef={onAddToCartRef} />
     </div>
   );
 }

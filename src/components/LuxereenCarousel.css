@@ -325,42 +325,47 @@
     cursor: not-allowed;
 }
 
-/* When fewer than 5 real products exist, keep every card visible (no padded duplicates). */
-.carousel__list[data-slide-count="1"] .carousel__item:nth-child(1),
-.carousel__list[data-slide-count="2"] .carousel__item:nth-child(1),
-.carousel__list[data-slide-count="3"] .carousel__item:nth-child(1),
-.carousel__list[data-slide-count="4"] .carousel__item:nth-child(1) {
-    flex: 1 1 10%;
-    margin: 0 10px;
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 15px 2px, rgba(0, 0, 0, 0.2) 0px 12px 28px 0px, rgba(0, 0, 0, 0.1) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
-    opacity: 1 !important;
+/* Fewer than 5 products: show only real cards, no reference spacer slots. */
+.carousel--compact .carousel__list {
+    justify-content: center;
 }
 
-.carousel__list[data-slide-count="1"] .carousel__item:nth-child(1) *,
-.carousel__list[data-slide-count="2"] .carousel__item:nth-child(1) *,
-.carousel__list[data-slide-count="3"] .carousel__item:nth-child(1) *,
-.carousel__list[data-slide-count="4"] .carousel__item:nth-child(1) * {
+.carousel--compact .carousel__item,
+.carousel--compact .carousel__item:nth-child(n) {
+    flex: 1 1 10% !important;
+    margin: 0 10px !important;
     opacity: 1 !important;
+    transform: none !important;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 15px 2px, rgba(0, 0, 0, 0.2) 0px 12px 28px 0px, rgba(0, 0, 0, 0.1) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset !important;
 }
 
-@media screen and (min-width: 600px) {
-    .carousel__list[data-slide-count="2"] .carousel__item:nth-child(2),
-    .carousel__list[data-slide-count="3"] .carousel__item:nth-child(2),
-    .carousel__list[data-slide-count="3"] .carousel__item:nth-child(3),
-    .carousel__list[data-slide-count="4"] .carousel__item:nth-child(2),
-    .carousel__list[data-slide-count="4"] .carousel__item:nth-child(3),
-    .carousel__list[data-slide-count="4"] .carousel__item:nth-child(4) {
-        opacity: 1 !important;
-    }
+.carousel--compact .carousel__item:not([data-active]) {
+    flex-basis: calc(var(--width) / 2) !important;
+    flex-grow: 0 !important;
+}
+
+.carousel--compact .carousel__item[data-active] {
+    flex-basis: var(--width) !important;
+    flex-grow: 0 !important;
+}
+
+.carousel--compact .carousel__item *,
+.carousel--compact .carousel__item img {
+    opacity: 1 !important;
+    filter: saturate(0.2) contrast(0.75) brightness(1.1);
+}
+
+.carousel--compact .carousel__item[data-active],
+.carousel--compact .carousel__item[data-active] * {
+    filter: none !important;
 }
 
 @media screen and (max-width: 600px) {
-    .carousel__list[data-slide-count="2"] .carousel__item:nth-child(2),
-    .carousel__list[data-slide-count="3"] .carousel__item:nth-child(2),
-    .carousel__list[data-slide-count="3"] .carousel__item:nth-child(3),
-    .carousel__list[data-slide-count="4"] .carousel__item:nth-child(2),
-    .carousel__list[data-slide-count="4"] .carousel__item:nth-child(3),
-    .carousel__list[data-slide-count="4"] .carousel__item:nth-child(4) {
-        opacity: 1 !important;
+    .carousel--compact .carousel__item:not([data-active]) {
+        flex-basis: 25% !important;
+    }
+
+    .carousel--compact .carousel__item[data-active] {
+        flex-basis: 45% !important;
     }
 }
