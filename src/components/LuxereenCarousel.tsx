@@ -16,8 +16,34 @@ type Product = {
   interactive_addons?: string | null;
 };
 
-function productsSignature(products: Product[]) {
-  return products.map((p) => p.id).join("|");
+const MIN_CAROUSEL_SLIDES = 12;
+const DEFAULT_ACTIVE_INDEX = 4;
+
+type CarouselSlide = {
+  product: Product;
+  key: string;
+  isActive: boolean;
+};
+
+function buildCarouselSlides(products: Product[]): CarouselSlide[] {
+  if (!products.length) return [];
+
+  const pool: Product[] = [];
+  while (pool.length < MIN_CAROUSEL_SLIDES) {
+    pool.push(...products);
+  }
+
+  const slides = pool.slice(0, MIN_CAROUSEL_SLIDES);
+  const featured = products[0];
+  const featuredIndex = slides.findIndex((product) => product.id === featured.id);
+  const rotateBy = (featuredIndex - DEFAULT_ACTIVE_INDEX + slides.length) % slides.length;
+  const rotated = [...slides.slice(rotateBy), ...slides.slice(0, rotateBy)];
+
+  return rotated.map((product, idx) => ({
+    product,
+    key: `${product.id}-${idx}`,
+    isActive: idx === DEFAULT_ACTIVE_INDEX,
+  }));
 }
 
 function buildCartPayload(product: Product) {
@@ -41,10 +67,10 @@ function buildCartPayload(product: Product) {
 }
 
 const CarouselInstance = memo(function CarouselInstance({
-  products,
+  slides,
   onAddToCartRef,
 }: {
-  products: Product[];
+  slides: CarouselSlide[];
   onAddToCartRef: React.RefObject<(product: Product) => void>;
 }) {
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -112,12 +138,12 @@ const CarouselInstance = memo(function CarouselInstance({
   }, [nextSlide, pauseAuto]);
 
   useEffect(() => {
-    if (!products.length) return;
+    if (!slides.length) return;
     startAuto();
     return () => {
       pauseAuto();
     };
-  }, [pauseAuto, products.length, startAuto]);
+  }, [pauseAuto, slides.length, startAuto]);
 
   useEffect(() => {
     const list = listRef.current;
@@ -204,7 +230,7 @@ const CarouselInstance = memo(function CarouselInstance({
   return (
     <section className="carousel">
       <ul className="carousel__list" ref={listRef}>
-        {products.map((product, idx) => {
+        {slides.map(({ product, key, isActive }) => {
           const imageUrl = product.image_urls?.[0];
           const quantity = Number(product.quantity);
           const isSoldOut = !Number.isFinite(quantity) || quantity <= 0;
@@ -213,9 +239,9 @@ const CarouselInstance = memo(function CarouselInstance({
 
           return (
             <li
-              key={product.id}
+              key={key}
               className="carousel__item"
-              data-active={idx === 0 ? "true" : undefined}
+              data-active={isActive ? "true" : undefined}
               tabIndex={0}
             >
               <div className="carousel__image" onClick={(e) => handleImageClick(product, e)}>
@@ -258,11 +284,16 @@ const CarouselInstance = memo(function CarouselInstance({
       </div>
     </section>
   );
-}, (prev, next) => productsSignature(prev.products) === productsSignature(next.products));
+}, (prev, next) => {
+  const prevKeys = prev.slides.map((slide) => slide.key).join("|");
+  const nextKeys = next.slides.map((slide) => slide.key).join("|");
+  return prevKeys === nextKeys;
+});
 
 export function LuxereenCarousel({ products, title, id }: { products: Product[]; title: string; id?: string }) {
   const { addToCart } = useCart();
   const onAddToCartRef = useRef<(product: Product) => void>(() => {});
+  const slides = buildCarouselSlides(products);
 
   onAddToCartRef.current = (product: Product) => {
     addToCart(buildCartPayload(product));
@@ -275,7 +306,7 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
   return (
     <div id={id} className="mb-20 pt-20 -mt-20">
       <h2 className="text-2xl md:text-3xl font-serif mb-8 pb-4 border-b border-border/50 uppercase tracking-widest">{title}</h2>
-      <CarouselInstance products={products} onAddToCartRef={onAddToCartRef} />
+      <CarouselInstance slides={slides} onAddToCartRef={onAddToCartRef} />
     </div>
   );
 }
