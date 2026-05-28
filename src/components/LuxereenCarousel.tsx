@@ -22,6 +22,10 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
   const autoRef = useRef<NodeJS.Timeout | null>(null);
   const pauserRef = useRef<NodeJS.Timeout | null>(null);
 
+  if (!products || products.length === 0) {
+    return null;
+  }
+
   useEffect(() => {
     if (!products || products.length === 0) return;
     startAuto();
@@ -129,18 +133,19 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
     const defaultColor = product.color_options ? product.color_options.split(",")[0].trim() : "";
     const defaultSize = product.size_matrix ? product.size_matrix.split(",")[0].trim() : "";
     const defaultAddon = product.interactive_addons ? product.interactive_addons.split(",")[0].trim() : "";
+    const priceValue = Number(product.price) || 0;
 
     addToCart({
-      product_id: product.id,
+      product_id: String(product.id),
       title: product.title,
-      price: product.price,
-      brand: product.brand,
+      price: priceValue,
+      brand: product.brand || "Luxereen",
       image_url: product.image_urls?.[0] || "",
       quantity: 1,
-      color: defaultColor,
-      size: defaultSize,
-      addon: defaultAddon,
-      measurement: "",
+      selected_color: defaultColor,
+      selected_size: defaultSize,
+      selected_addon: defaultAddon,
+      custom_measurement: "",
     });
   };
 
@@ -159,6 +164,10 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
 
     (slide as HTMLElement).focus();
   };
+
+  if (!products || products.length === 0) {
+    return null;
+  }
 
   return (
     <div id={id} className="mb-20 pt-20 -mt-20">
@@ -180,44 +189,28 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
                 data-active={idx === 0 ? "true" : undefined}
                 tabIndex={0}
               >
-                <div className="carousel__box">
-                  <div className="carousel__image" onClick={(e) => handleImageClick(product, e)}>
-                    {imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imageUrl} alt={product.title} />
-                    ) : null}
-                  </div>
-                  <div className="carousel__contents">
-                    <h2 className="user__name">{product.title}</h2>
-                    <h3 className="user__title">
-                      {isSoldOut ? (
-                        "Sold Out"
-                      ) : hasPrice ? (
-                        `Rs. ${priceValue.toLocaleString()}`
-                      ) : (
-                        "Contact"
-                      )}
-                    </h3>
-                  </div>
+                <div className="carousel__image" onClick={(e) => handleImageClick(product, e)}>
+                  {imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={imageUrl} alt={product.title} />
+                  ) : null}
+                </div>
+                <div className="carousel__contents">
+                  <h2 className="user__name">{product.title}</h2>
+                  <h3 className="user__title">
+                    {isSoldOut ? (
+                      "Sold Out"
+                    ) : hasPrice ? (
+                      `Rs. ${priceValue.toLocaleString()}`
+                    ) : (
+                      "Contact"
+                    )}
+                  </h3>
                 </div>
               </li>
             );
           })}
         </ul>
-        <div className="carousel__nav">
-          <button className="prev" type="button" onClick={handlePrevClick}>
-            <svg width="24" height="24" viewBox="0 0 24 24">
-              <path d="M9.586 4l-6.586 6.586a2 2 0 0 0 0 2.828l6.586 6.586a2 2 0 0 0 2.18 .434l.145 -.068a2 2 0 0 0 1.089 -1.78v-2.586h7a2 2 0 0 0 2 -2v-4l-.005 -.15a2 2 0 0 0 -1.995 -1.85l-7 -.001v-2.585a2 2 0 0 0 -3.414 -1.414z" />
-            </svg>
-            <span>prev</span>
-          </button>
-          <button className="next" type="button" onClick={handleNextClick}>
-            <span>next</span>
-            <svg width="24" height="24" viewBox="0 0 24 24">
-              <path d="M12.089 3.634a2 2 0 0 0 -1.089 1.78l-.001 2.586h-6.999a2 2 0 0 0 -2 2v4l.005 .15a2 2 0 0 0 1.995 1.85l6.999 -.001l.001 2.587a2 2 0 0 0 3.414 1.414l6.586 -6.586a2 2 0 0 0 0 -2.828l-6.586 -6.586a2 2 0 0 0 -2.18 -.434l-.145 .068z" />
-            </svg>
-          </button>
-        </div>
       </section>
     </div>
   );

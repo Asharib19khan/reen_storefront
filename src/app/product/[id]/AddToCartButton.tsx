@@ -23,11 +23,13 @@ export function AddToCartButton({ product }: { product: any }) {
   const [customMeasurement, setCustomMeasurement] = useState("");
 
   const handleAdd = () => {
+    const priceValue = Number(product.price) || 0;
+
     addToCart({
-      product_id: product.id,
+      product_id: String(product.id),
       title: product.title,
-      price: product.price,
-      brand: product.brand,
+      price: priceValue,
+      brand: product.brand || "Luxereen",
       quantity: qty,
       image_url: product.image_urls[0] || "https://placehold.co/600x600/fbcfe8/831843?text=Reens",
       selected_color: selectedColor,
