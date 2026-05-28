@@ -20,7 +20,7 @@ interface CartContextType {
   items: CartItem[]
   addToCart: (item: Omit<CartItem, 'cart_item_id'>) => void
   removeFromCart: (cart_item_id: string) => void
-  updateQuantity: (product_id: string, quantity: number) => void
+  updateQuantity: (cart_item_id: string, quantity: number) => void
   clearCart: () => void
   totalAmount: number
 }

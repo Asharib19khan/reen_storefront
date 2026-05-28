@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useCart } from "@/lib/cart-context";
 import "./LuxereenCarousel.css";
 
@@ -22,42 +22,33 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
   const autoRef = useRef<NodeJS.Timeout | null>(null);
   const pauserRef = useRef<NodeJS.Timeout | null>(null);
 
-  if (!products || products.length === 0) {
-    return null;
-  }
+  const getSlides = useCallback(() => Array.from(listRef.current?.querySelectorAll(".carousel__item") || []), []);
 
-  useEffect(() => {
-    if (!products || products.length === 0) return;
-    startAuto();
-    return () => {
-      pauseAuto();
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [products.length]);
+  const getSlideIndex = useCallback(
+    ($slide: Element | null) => {
+      if (!$slide) return -1;
+      return getSlides().indexOf($slide as HTMLElement);
+    },
+    [getSlides]
+  );
 
-  if (!products || products.length === 0) return null;
-
-  const getSlides = () => Array.from(listRef.current?.querySelectorAll(".carousel__item") || []);
-
-  const getSlideIndex = ($slide: Element | null) => {
-    if (!$slide) return -1;
-    return getSlides().indexOf($slide as HTMLElement);
-  };
-
-  const getActiveIndex = () => {
+  const getActiveIndex = useCallback(() => {
     const $active = listRef.current?.querySelector("[data-active]") || null;
     return getSlideIndex($active);
-  };
+  }, [getSlideIndex]);
 
-  const activateSlide = ($slide: Element | null) => {
-    if (!$slide) return;
-    const $slides = getSlides();
-    $slides.forEach((el) => el.removeAttribute("data-active"));
-    $slide.setAttribute("data-active", "true");
-    ( $slide as HTMLElement ).focus();
-  };
+  const activateSlide = useCallback(
+    ($slide: Element | null) => {
+      if (!$slide) return;
+      const $slides = getSlides();
+      $slides.forEach((el) => el.removeAttribute("data-active"));
+      $slide.setAttribute("data-active", "true");
+      ($slide as HTMLElement).focus();
+    },
+    [getSlides]
+  );
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     const index = getActiveIndex();
     const $slides = getSlides();
     const $last = $slides[$slides.length - 1];
@@ -65,9 +56,9 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
     $last.remove();
     listRef.current.prepend($last);
     activateSlide(getSlides()[index]);
-  };
+  }, [activateSlide, getActiveIndex, getSlides]);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     const index = getActiveIndex();
     const $slides = getSlides();
     const $first = $slides[0];
@@ -75,7 +66,27 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
     $first.remove();
     listRef.current.append($first);
     activateSlide(getSlides()[index]);
-  };
+  }, [activateSlide, getActiveIndex, getSlides]);
+
+  const pauseAuto = useCallback(() => {
+    if (autoRef.current) clearInterval(autoRef.current);
+    if (pauserRef.current) clearTimeout(pauserRef.current);
+  }, []);
+
+  const startAuto = useCallback(() => {
+    pauseAuto();
+    autoRef.current = setInterval(() => {
+      nextSlide();
+    }, 3000);
+  }, [nextSlide, pauseAuto]);
+
+  useEffect(() => {
+    if (!products.length) return;
+    startAuto();
+    return () => {
+      pauseAuto();
+    };
+  }, [products.length, pauseAuto, startAuto]);
 
   const chooseSlide = (e: React.FocusEvent | React.MouseEvent) => {
     const max = window.matchMedia("screen and ( max-width: 600px)").matches ? 5 : 8;
@@ -86,15 +97,6 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
     if (index === max) nextSlide();
     if (index === 3) prevSlide();
     activateSlide($slide);
-  };
-
-  const autoSlide = () => {
-    nextSlide();
-  };
-
-  const pauseAuto = () => {
-    if (autoRef.current) clearInterval(autoRef.current);
-    if (pauserRef.current) clearTimeout(pauserRef.current);
   };
 
   const handleNextClick = () => {
@@ -123,10 +125,6 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
         handleNextClick();
         break;
     }
-  };
-
-  const startAuto = () => {
-    autoRef.current = setInterval(autoSlide, 3000);
   };
 
   const handleAddToCart = (product: Product) => {

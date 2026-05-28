@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { HeroCarousel } from "@/components/HeroCarousel";
@@ -8,7 +8,9 @@ import { AnimatedProductGrid } from "@/components/AnimatedProductGrid";
 export const revalidate = 60;
 
 export default async function Home() {
-  // Fetch everything in parallel for maximum speed
+  const supabase = getSupabase();
+  const empty = { data: null as null };
+
   const [
     { data: bestSelling },
     { data: newArrivals },
@@ -16,14 +18,16 @@ export default async function Home() {
     { data: luxereenFeatured },
     { data: banners },
     { data: reviews }
-  ] = await Promise.all([
-    supabase.from("products").select("*").eq("is_active", true).eq("is_best_selling", true).limit(4),
-    supabase.from("products").select("*").eq("is_active", true).eq("is_new_arrival", true).limit(4),
-    supabase.from("products").select("*").eq("is_active", true).eq("brand", "byreen_xo").limit(3),
-    supabase.from("products").select("*").eq("is_active", true).eq("brand", "luxereen_wears").limit(3),
-    supabase.from("hero_banners").select("*").in("title", ["Home_page_hero_desktop", "Home_page_hero_mobile"]).eq("is_active", true),
-    supabase.from("customer_reviews").select("*").eq("is_approved", true).eq("is_featured", true).order("created_at", { ascending: false }).limit(3)
-  ]);
+  ] = supabase
+    ? await Promise.all([
+        supabase.from("products").select("*").eq("is_active", true).eq("is_best_selling", true).limit(4),
+        supabase.from("products").select("*").eq("is_active", true).eq("is_new_arrival", true).limit(4),
+        supabase.from("products").select("*").eq("is_active", true).eq("brand", "byreen_xo").limit(3),
+        supabase.from("products").select("*").eq("is_active", true).eq("brand", "luxereen_wears").limit(3),
+        supabase.from("hero_banners").select("*").in("title", ["Home_page_hero_desktop", "Home_page_hero_mobile"]).eq("is_active", true),
+        supabase.from("customer_reviews").select("*").eq("is_approved", true).eq("is_featured", true).order("created_at", { ascending: false }).limit(3),
+      ])
+    : [empty, empty, empty, empty, empty, empty];
 
   const desktopBanner = banners?.find(b => b.title === "Home_page_hero_desktop") || null;
   const mobileBanner = banners?.find(b => b.title === "Home_page_hero_mobile") || null;

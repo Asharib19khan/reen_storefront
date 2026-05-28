@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { AddToCartButton } from "./AddToCartButton";
@@ -13,12 +13,11 @@ export default async function ProductPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  
-  const { data: product } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", resolvedParams.id)
-    .single();
+  const supabase = getSupabase();
+
+  const { data: product } = supabase
+    ? await supabase.from("products").select("*").eq("id", resolvedParams.id).single()
+    : { data: null };
 
   if (!product || !product.is_active) {
     notFound();

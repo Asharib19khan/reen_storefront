@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,10 +54,11 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
     setError(null);
 
     try {
-      // NOTE: We pass payment_method alongside address to process_checkout.
-      // Since process_checkout might not explicitly have a parameter for payment_method yet,
-      // we append it to the address string for now, or update the RPC. 
-      // For safety, appending to address:
+      const supabase = getSupabase();
+      if (!supabase) {
+        throw new Error("Store is not configured. Please try again later.");
+      }
+
       const fullAddress = `${formData.customer_address}\n\n[Payment Method: ${formData.payment_method}]`;
 
       const { data, error: rpcError } = await supabase.rpc("process_checkout", {
@@ -65,11 +66,15 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
         p_customer_phone: formData.customer_phone,
         p_customer_address: fullAddress,
         p_total_amount: totalAmount,
-        p_cart_items: items.map(i => ({
+        p_cart_items: items.map((i) => ({
           product_id: i.product_id,
           quantity: i.quantity,
-          price_at_purchase: i.price
-        }))
+          price_at_purchase: i.price,
+          selected_color: i.selected_color || null,
+          selected_size: i.selected_size || null,
+          custom_measurement: i.custom_measurement || null,
+          selected_addon: i.selected_addon || null,
+        })),
       });
 
       if (rpcError) throw rpcError;
@@ -217,8 +222,8 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
         <div className="border rounded-xl p-6 bg-muted/20 sticky top-24">
           <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
           <div className="flex flex-col gap-6 mb-6">
-            {items.map(item => (
-              <div key={item.product_id} className="flex gap-4">
+            {items.map((item) => (
+              <div key={item.cart_item_id} className="flex gap-4">
                 <div className="w-20 h-20 rounded-md bg-muted overflow-hidden shrink-0 border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />

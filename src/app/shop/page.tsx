@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { BrandHero } from "@/components/BrandHero";
@@ -14,30 +14,35 @@ export default async function ShopPage({
 }) {
   const resolvedParams = await searchParams;
   const brand = resolvedParams.brand;
-
-  let query = supabase.from("products").select("*").eq("is_active", true).order("created_at", { ascending: false });
+  const supabase = getSupabase();
 
   let desktopBannerTitle = null;
   let mobileBannerTitle = null;
   let displayTitle = "Shop All";
 
   if (brand === "byreen_xo") {
-    query = query.eq("brand", brand);
     desktopBannerTitle = "byreen.xo_page_hero_desktop";
     mobileBannerTitle = "byreen.xo_page_hero_mobile";
     displayTitle = "byreen.xo";
   } else if (brand === "luxereen_wears") {
-    query = query.eq("brand", brand);
     desktopBannerTitle = "luxereen.wears_page_hero_desktop";
     mobileBannerTitle = "luxereen.wears_page_hero_mobile";
     displayTitle = "luxereen.wears";
   }
 
-  const { data: products } = await query;
+  const { data: products } = supabase
+    ? await (async () => {
+        let query = supabase.from("products").select("*").eq("is_active", true).order("created_at", { ascending: false });
+        if (brand === "byreen_xo" || brand === "luxereen_wears") {
+          query = query.eq("brand", brand);
+        }
+        return query;
+      })()
+    : { data: null };
 
   let desktopBanner = null;
   let mobileBanner = null;
-  if (desktopBannerTitle && mobileBannerTitle) {
+  if (supabase && desktopBannerTitle && mobileBannerTitle) {
     const { data: bData } = await supabase
       .from("hero_banners")
       .select("*")
