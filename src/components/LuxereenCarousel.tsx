@@ -16,9 +16,6 @@ type Product = {
   interactive_addons?: string | null;
 };
 
-const MIN_CAROUSEL_SLIDES = 12;
-const DEFAULT_ACTIVE_INDEX = 4;
-
 type CarouselSlide = {
   product: Product;
   key: string;
@@ -28,21 +25,26 @@ type CarouselSlide = {
 function buildCarouselSlides(products: Product[]): CarouselSlide[] {
   if (!products.length) return [];
 
-  const pool: Product[] = [];
-  while (pool.length < MIN_CAROUSEL_SLIDES) {
-    pool.push(...products);
+  const featured = products[0];
+  let ordered = [...products];
+  let activeIndex = 0;
+
+  if (products.length >= 5) {
+    // Reference layout: featured product sits in the center slot when enough real items exist.
+    activeIndex = 4;
+    const featuredIndex = ordered.findIndex((product) => product.id === featured.id);
+    const rotateBy = (featuredIndex - activeIndex + ordered.length) % ordered.length;
+    ordered = [...ordered.slice(rotateBy), ...ordered.slice(0, rotateBy)];
+  } else if (products.length > 1) {
+    // Avoid placing the featured item in the hidden first slot when only a few products exist.
+    ordered = [...products.slice(1), featured];
+    activeIndex = ordered.findIndex((product) => product.id === featured.id);
   }
 
-  const slides = pool.slice(0, MIN_CAROUSEL_SLIDES);
-  const featured = products[0];
-  const featuredIndex = slides.findIndex((product) => product.id === featured.id);
-  const rotateBy = (featuredIndex - DEFAULT_ACTIVE_INDEX + slides.length) % slides.length;
-  const rotated = [...slides.slice(rotateBy), ...slides.slice(0, rotateBy)];
-
-  return rotated.map((product, idx) => ({
+  return ordered.map((product, idx) => ({
     product,
-    key: `${product.id}-${idx}`,
-    isActive: idx === DEFAULT_ACTIVE_INDEX,
+    key: String(product.id),
+    isActive: idx === activeIndex,
   }));
 }
 
@@ -229,7 +231,7 @@ const CarouselInstance = memo(function CarouselInstance({
 
   return (
     <section className="carousel">
-      <ul className="carousel__list" ref={listRef}>
+      <ul className="carousel__list" ref={listRef} data-slide-count={slides.length}>
         {slides.map(({ product, key, isActive }) => {
           const imageUrl = product.image_urls?.[0];
           const quantity = Number(product.quantity);
