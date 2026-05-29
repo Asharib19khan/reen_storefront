@@ -328,31 +328,101 @@
 /* Fewer than 5 products: show only real cards, no reference spacer slots. */
 .carousel--compact .carousel__list {
     justify-content: center;
+    align-items: stretch;
+    overflow: visible;
+    gap: 0.75rem;
+    width: 100%;
 }
 
 .carousel--compact .carousel__item,
+.carousel--compact .carousel__item:nth-child(1),
+.carousel--compact .carousel__item:nth-child(2),
+.carousel--compact .carousel__item:nth-child(3),
 .carousel--compact .carousel__item:nth-child(n) {
-    flex: 1 1 10% !important;
-    margin: 0 10px !important;
+    flex: 0 0 auto !important;
+    min-width: 0;
+    margin: 0 !important;
     opacity: 1 !important;
     transform: none !important;
     box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 15px 2px, rgba(0, 0, 0, 0.2) 0px 12px 28px 0px, rgba(0, 0, 0, 0.1) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset !important;
 }
 
 .carousel--compact .carousel__item:not([data-active]) {
-    flex-basis: calc(var(--width) / 2) !important;
-    flex-grow: 0 !important;
+    flex: 0 0 clamp(160px, 32vw, 280px) !important;
 }
 
 .carousel--compact .carousel__item[data-active] {
-    flex-basis: var(--width) !important;
-    flex-grow: 0 !important;
+    flex: 0 0 clamp(220px, 48vw, var(--width)) !important;
 }
 
-.carousel--compact .carousel__item *,
+.carousel--compact .carousel__item::after {
+    opacity: 0 !important;
+    transform: none !important;
+}
+
+.carousel--compact .carousel__image,
+.carousel--compact .carousel__contents {
+    width: 100%;
+}
+
+.carousel--compact .carousel__image {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+}
+
 .carousel--compact .carousel__item img {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    z-index: 0;
     opacity: 1 !important;
-    filter: saturate(0.2) contrast(0.75) brightness(1.1);
+    filter: saturate(0.35) contrast(0.85) brightness(1.05);
+    object-fit: cover;
+}
+
+.carousel--compact .carousel__item[data-active] img {
+    filter: none !important;
+}
+
+.carousel--compact .carousel__item:not(:nth-child(n+4)) *,
+.carousel--compact .carousel__item:nth-child(n+7) *,
+.carousel--compact .carousel__item:nth-child(n+10) * {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+.carousel--compact .carousel__contents {
+    transform: none !important;
+    background-position: 0 0 !important;
+    min-height: 160px;
+}
+
+.carousel--compact .carousel__contents .user__title,
+.carousel--compact .carousel__contents .user__name {
+    transform: none !important;
+}
+
+.carousel--compact .carousel__item:not([data-active]) .carousel__contents .user__title,
+.carousel--compact .carousel__item:not([data-active]) .carousel__contents .user__name,
+.carousel--compact .carousel__item:not([data-active]) .carousel__add-to-cart {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+.carousel--compact .carousel__item[data-active] .carousel__contents .user__title,
+.carousel--compact .carousel__item[data-active] .carousel__contents .user__name {
+    opacity: 1 !important;
+}
+
+.carousel__image-placeholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(30, 30, 40, 0.9), rgba(60, 60, 80, 0.75));
 }
 
 .carousel--compact .carousel__item[data-active],
@@ -360,12 +430,26 @@
     filter: none !important;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 800px) {
     .carousel--compact .carousel__item:not([data-active]) {
-        flex-basis: 25% !important;
+        flex: 0 0 clamp(120px, 28vw, 200px) !important;
     }
 
     .carousel--compact .carousel__item[data-active] {
-        flex-basis: 45% !important;
+        flex: 0 0 clamp(180px, 52vw, 320px) !important;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .carousel--compact .carousel__list {
+        overflow: hidden;
+    }
+
+    .carousel--compact .carousel__item:not([data-active]) {
+        flex: 0 0 30% !important;
+    }
+
+    .carousel--compact .carousel__item[data-active] {
+        flex: 0 0 58% !important;
     }
 }

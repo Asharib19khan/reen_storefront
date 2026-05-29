@@ -301,7 +301,9 @@ const CarouselInstance = memo(function CarouselInstance({
                 {imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={imageUrl} alt={product.title} />
-                ) : null}
+                ) : (
+                  <div className="carousel__image-placeholder" aria-hidden="true" />
+                )}
               </div>
               <div className="carousel__contents">
                 <h2 className="user__name">{product.title}</h2>
