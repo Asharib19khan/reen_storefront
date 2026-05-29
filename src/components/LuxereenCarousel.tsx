@@ -2,7 +2,6 @@
 
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import "./LuxereenCarousel.css";
 
@@ -104,7 +103,6 @@ const CarouselInstance = memo(function CarouselInstance({
   const nextRef = useRef<HTMLButtonElement | null>(null);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pauserRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const router = useRouter();
   const isCompactRef = useRef(isCompact);
   isCompactRef.current = isCompact;
 
@@ -199,8 +197,13 @@ const CarouselInstance = memo(function CarouselInstance({
     const nextBtn = nextRef.current;
     if (!list || !prevBtn || !nextBtn) return;
 
+    const isInteractiveTarget = (target: HTMLElement | null) =>
+      Boolean(target?.closest("a, button, input, textarea, select, label"));
+
     const chooseSlide = (e: Event) => {
       const target = e.target as HTMLElement | null;
+      if (isInteractiveTarget(target)) return;
+
       const $slide = target?.closest(".carousel__item") || null;
       if (!$slide) return;
 
@@ -229,8 +232,21 @@ const CarouselInstance = memo(function CarouselInstance({
     };
 
     const handleSlideClick = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (isInteractiveTarget(target)) return;
       pauseAuto();
       chooseSlide(e);
+    };
+
+    const handleSlidePointerClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (isInteractiveTarget(target)) return;
+
+      const $slide = target?.closest(".carousel__item") || null;
+      if (!$slide || $slide.hasAttribute("data-active")) return;
+
+      pauseAuto();
+      activateSlide($slide);
     };
 
     const handleSlideKey = (e: KeyboardEvent) => {
@@ -249,28 +265,22 @@ const CarouselInstance = memo(function CarouselInstance({
     nextBtn.addEventListener("click", handleNextClick);
     prevBtn.addEventListener("click", handlePrevClick);
     list.addEventListener("focusin", handleSlideClick);
+    list.addEventListener("click", handleSlidePointerClick);
     list.addEventListener("keyup", handleSlideKey);
 
     return () => {
       nextBtn.removeEventListener("click", handleNextClick);
       prevBtn.removeEventListener("click", handlePrevClick);
       list.removeEventListener("focusin", handleSlideClick);
+      list.removeEventListener("click", handleSlidePointerClick);
       list.removeEventListener("keyup", handleSlideKey);
     };
   }, [activateSlide, getSlideIndex, nextSlide, pauseAuto, prevSlide]);
 
-  const handleImageClick = (product: Product, e: React.MouseEvent) => {
-    const target = e.target as HTMLElement | null;
-    const slide = target?.closest(".carousel__item") || null;
-    if (!slide) return;
-
-    if (slide.hasAttribute("data-active")) {
-      pauseAuto();
-      router.push(`/product/${product.id}`);
-      return;
-    }
-
-    (slide as HTMLElement).focus();
+  const handleInactiveImageClick = (e: React.MouseEvent, slide: HTMLElement) => {
+    e.preventDefault();
+    pauseAuto();
+    activateSlide(slide);
   };
 
   const handleAddToCartClick = (product: Product, e: React.MouseEvent) => {
@@ -291,6 +301,8 @@ const CarouselInstance = memo(function CarouselInstance({
           const priceValue = Number(product.price);
           const hasPrice = Number.isFinite(priceValue) && priceValue >= 0;
 
+          const productHref = `/product/${product.id}`;
+
           return (
             <li
               key={key}
@@ -298,33 +310,38 @@ const CarouselInstance = memo(function CarouselInstance({
               data-active={isActive ? "true" : undefined}
               tabIndex={0}
             >
-              <div className="carousel__image" onClick={(e) => handleImageClick(product, e)}>
+              <Link
+                href={productHref}
+                className="carousel__image-link"
+                aria-label={`View ${product.title}`}
+                onClick={(e) => {
+                  const slide = e.currentTarget.closest(".carousel__item");
+                  if (slide && !slide.hasAttribute("data-active")) {
+                    handleInactiveImageClick(e, slide as HTMLElement);
+                  } else {
+                    pauseAuto();
+                  }
+                }}
+              >
                 {imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={imageUrl} alt={product.title} />
                 ) : (
                   <div className="carousel__image-placeholder" aria-hidden="true" />
                 )}
-              </div>
+              </Link>
               <div className="carousel__contents">
                 <Link
-                  href={`/product/${product.id}`}
+                  href={productHref}
                   className="user__name carousel__product-link"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={() => pauseAuto()}
                 >
                   {product.title}
                 </Link>
                 <h3 className="user__title">
                   {isSoldOut ? "Sold Out" : hasPrice ? `Rs. ${priceValue.toLocaleString()}` : "Contact"}
                 </h3>
-                <Link
-                  href={`/product/${product.id}`}
-                  className="carousel__view-details"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    pauseAuto();
-                  }}
-                >
+                <Link href={productHref} className="carousel__view-details" onClick={() => pauseAuto()}>
                   View details
                 </Link>
                 <button
