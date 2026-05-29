@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 import { Minus, Plus, ShoppingCart, Ruler } from "lucide-react";
+import { WishlistButton } from "@/components/WishlistButton";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -138,15 +139,26 @@ export function AddToCartButton({ product }: { product: any }) {
           </div>
         </div>
 
-        <Button 
-          size="lg" 
-          className="w-full text-base h-12" 
-          onClick={handleAdd}
-          variant={added ? "secondary" : "default"}
-        >
-          <ShoppingCart className="mr-2 h-5 w-5" /> 
-          {added ? "Added to Cart" : "Add to Cart"}
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            size="lg" 
+            className="flex-1 text-base h-12" 
+            onClick={handleAdd}
+            variant={added ? "secondary" : "default"}
+          >
+            <ShoppingCart className="mr-2 h-5 w-5" /> 
+            {added ? "Added to Cart" : "Add to Cart"}
+          </Button>
+          <WishlistButton
+            product={{
+              id: String(product.id),
+              title: product.title,
+              price: product.price,
+              brand: product.brand,
+              image_urls: product.image_urls,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

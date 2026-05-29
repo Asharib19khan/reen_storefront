@@ -4,6 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { AddToCartButton } from "./AddToCartButton";
 import { ImageGallery } from "./ImageGallery";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { WishlistButton } from "@/components/WishlistButton";
+import { ProductTrustBlock } from "@/components/ProductTrustBlock";
+import { RelatedProducts } from "@/components/RelatedProducts";
+import { MobileStickyAddToCart } from "@/components/MobileStickyAddToCart";
+import type { StoreProduct } from "@/lib/product-types";
 
 export const revalidate = 60;
 
@@ -23,16 +28,41 @@ export default async function ProductPage({
     notFound();
   }
 
+  let relatedProducts: StoreProduct[] = [];
+  if (supabase) {
+    const { data: related } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_active", true)
+      .eq("brand", product.brand)
+      .neq("id", product.id)
+      .limit(4);
+
+    relatedProducts = (related || []) as StoreProduct[];
+
+    if (relatedProducts.length < 4 && product.category) {
+      const { data: byCategory } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .eq("category", product.category)
+        .neq("id", product.id)
+        .limit(4 - relatedProducts.length);
+
+      const ids = new Set(relatedProducts.map((p) => p.id));
+      (byCategory || []).forEach((p) => {
+        if (!ids.has(p.id)) relatedProducts.push(p as StoreProduct);
+      });
+    }
+  }
+
   const isSoldOut = product.quantity === 0;
 
   return (
-    <div className="w-full bg-background min-h-screen">
-      
-      {/* 1. Hero Image Placement Concept */}
+    <div className="w-full bg-background min-h-screen pb-24 md:pb-10">
       {product.hero_image_concept && (
         <div className="w-full h-[40vh] md:h-[600px] bg-muted relative mb-10 overflow-hidden">
-          {/* We assume hero_image_concept could be a URL or a text description. If it's a URL, we render it. If not, we render the first image as a wide crop. */}
-          {product.hero_image_concept.startsWith('http') ? (
+          {product.hero_image_concept.startsWith("http") ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={product.hero_image_concept} alt="Hero Concept" className="w-full h-full object-cover" />
           ) : (
@@ -52,13 +82,11 @@ export default async function ProductPage({
 
       <div className="max-w-7xl mx-auto px-4 py-10 w-full">
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16 items-start">
-          
-          {/* Left Column: Media & Visuals */}
-          <div className="flex flex-col gap-8 sticky top-24">
+          <div className="flex flex-col gap-8 md:sticky md:top-24">
             {!product.hero_image_concept && (
               <ImageGallery images={product.image_urls} title={product.title} />
             )}
-            
+
             {product.hero_image_concept && (
               <div className="grid grid-cols-2 gap-4">
                 {product.image_urls.map((url: string, idx: number) => (
@@ -70,28 +98,24 @@ export default async function ProductPage({
               </div>
             )}
 
-            {/* Faceless Product Video Embed */}
             {product.video_url && (
               <div className="w-full aspect-video bg-muted rounded-xl overflow-hidden relative group border">
-                {product.video_url.includes('youtube') || product.video_url.includes('vimeo') ? (
-                  <iframe src={product.video_url} className="w-full h-full" allowFullScreen />
+                {product.video_url.includes("youtube") || product.video_url.includes("vimeo") ? (
+                  <iframe src={product.video_url} className="w-full h-full" allowFullScreen title="Product video" />
                 ) : (
                   <video src={product.video_url} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                 )}
               </div>
             )}
 
-            {/* 360 View Frame */}
             {product.view_360_url && (
               <div className="w-full aspect-square bg-muted rounded-xl overflow-hidden border p-2">
                 <iframe src={product.view_360_url} className="w-full h-full border-0" title="360 View" />
               </div>
             )}
           </div>
-          
-          {/* Right Column: Copy & Actions */}
+
           <div className="flex flex-col">
-            
             {!product.hero_image_concept && (
               <div className="mb-6">
                 <Badge variant="secondary" className="mb-4">
@@ -101,14 +125,15 @@ export default async function ProductPage({
                 <p className="text-2xl font-semibold text-primary">Rs. {product.price}</p>
               </div>
             )}
-            
+
             {product.hero_image_concept && (
               <div className="mb-6">
-                 <p className="text-3xl font-semibold text-primary">Rs. {product.price}</p>
+                <p className="text-3xl font-semibold text-primary">Rs. {product.price}</p>
               </div>
             )}
 
-            {/* SEO PRODUCT COPY */}
+            <ProductTrustBlock />
+
             {product.hook_text && (
               <p className="text-lg md:text-xl font-medium text-foreground mb-6 italic border-l-4 border-primary pl-4 leading-relaxed">
                 {product.hook_text}
@@ -125,18 +150,30 @@ export default async function ProductPage({
               </div>
             )}
 
-            {/* Interactive Add To Cart Block */}
             <div className="bg-muted/30 p-6 rounded-xl border border-border/50 mb-10">
               {isSoldOut ? (
-                <div className="bg-destructive/10 text-destructive font-medium p-4 rounded-md text-center">
-                  This signature piece is currently sold out.
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="bg-destructive/10 text-destructive font-medium p-4 rounded-md w-full">
+                    This signature piece is currently sold out.
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Save it to your wishlist so we can follow up when it&apos;s available again.
+                  </p>
+                  <WishlistButton
+                    product={{
+                      id: String(product.id),
+                      title: product.title,
+                      price: product.price,
+                      brand: product.brand,
+                      image_urls: product.image_urls,
+                    }}
+                  />
                 </div>
               ) : (
                 <AddToCartButton product={product} />
               )}
             </div>
 
-            {/* Detailed Accordions for Care & Sizing */}
             <Accordion type="single" collapsible className="w-full border-t border-border">
               {product.fabric_care && (
                 <AccordionItem value="fabric-care">
@@ -146,7 +183,7 @@ export default async function ProductPage({
                   </AccordionContent>
                 </AccordionItem>
               )}
-              
+
               {product.sizing_note && (
                 <AccordionItem value="sizing-note">
                   <AccordionTrigger className="text-base font-semibold">Sizing Note & Fit Guide</AccordionTrigger>
@@ -156,20 +193,33 @@ export default async function ProductPage({
                 </AccordionItem>
               )}
 
-              {/* Fallback Shipping Info */}
               <AccordionItem value="shipping">
                 <AccordionTrigger className="text-base font-semibold">Shipping & Returns</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground prose prose-sm">
-                  We offer nationwide shipping across Pakistan. Standard delivery takes 3-5 business days. 
-                  Due to the bespoke nature of our pieces, all custom-measured items are non-refundable. 
+                  We offer nationwide shipping across Pakistan. Standard delivery takes 3-5 business days.
+                  Due to the bespoke nature of our pieces, all custom-measured items are non-refundable.
                   Standard sizes may be exchanged within 7 days of delivery with tags attached.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-
           </div>
         </div>
       </div>
+
+      <RelatedProducts products={relatedProducts.slice(0, 4)} />
+
+      {!isSoldOut && (
+        <MobileStickyAddToCart
+          product={{
+            id: String(product.id),
+            title: product.title,
+            price: product.price,
+            brand: product.brand,
+            quantity: product.quantity,
+            image_urls: product.image_urls,
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
 import { ProductCard } from "@/components/ProductCard";
+import { ByreenHoverCard } from "@/components/byreen/ByreenHoverCard";
 import { Button } from "@/components/ui/button";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { AnimatedProductGrid } from "@/components/AnimatedProductGrid";
@@ -62,23 +63,29 @@ export default async function Home() {
         </section>
       )}
 
-      {/* byreen.xo Featured Section */}
       {byreenFeatured && byreenFeatured.length > 0 && (
         <section id="byreen-xo-featured" className="py-20 bg-muted/20 w-full border-y border-border/50">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
               <div>
                 <h2 className="text-4xl font-serif text-foreground">byreen.xo</h2>
-                <p className="text-muted-foreground mt-2 max-w-xl">Curated premium jewelry. From seamless permanent bracelets to elegant daily-wear chains and traditional jhumkas.</p>
+                <p className="text-muted-foreground mt-2 max-w-xl">
+                  Curated premium jewelry. From seamless permanent bracelets to elegant daily-wear chains
+                  and traditional jhumkas.
+                </p>
               </div>
               <Link href="/shop?brand=byreen_xo">
-                <Button variant="outline" className="rounded-full uppercase tracking-widest text-xs px-8">Explore byreen.xo</Button>
+                <Button variant="outline" className="rounded-full uppercase tracking-widest text-xs px-8">
+                  Explore byreen.xo
+                </Button>
               </Link>
             </div>
             <AnimatedProductGrid>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
                 {byreenFeatured.map((product) => (
-                  <div key={product.id} className="product-card-anim opacity-0"><ProductCard product={product} /></div>
+                  <div key={product.id} className="product-card-anim opacity-0 w-full max-w-[20rem]">
+                    <ByreenHoverCard product={product} />
+                  </div>
                 ))}
               </div>
             </AnimatedProductGrid>
@@ -86,23 +93,29 @@ export default async function Home() {
         </section>
       )}
 
-      {/* luxereen.wears Featured Section */}
       {luxereenFeatured && luxereenFeatured.length > 0 && (
         <section id="luxereen-wears-featured" className="py-20 bg-background w-full">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
               <div>
                 <h2 className="text-4xl font-serif text-foreground">luxereen.wears</h2>
-                <p className="text-muted-foreground mt-2 max-w-xl">The clothing collective. Discover signature corset co-ords, modern printed kurtis, and elegant traditional fusion wear.</p>
+                <p className="text-muted-foreground mt-2 max-w-xl">
+                  The clothing collective. Discover signature corset co-ords, modern printed kurtis, and
+                  elegant traditional fusion wear.
+                </p>
               </div>
               <Link href="/shop?brand=luxereen_wears">
-                <Button variant="outline" className="rounded-full uppercase tracking-widest text-xs px-8">Explore luxereen.wears</Button>
+                <Button variant="outline" className="rounded-full uppercase tracking-widest text-xs px-8">
+                  Explore luxereen.wears
+                </Button>
               </Link>
             </div>
             <AnimatedProductGrid>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {luxereenFeatured.map((product) => (
-                  <div key={product.id} className="product-card-anim opacity-0"><ProductCard product={product} /></div>
+                  <div key={product.id} className="product-card-anim opacity-0">
+                    <ProductCard product={product} />
+                  </div>
                 ))}
               </div>
             </AnimatedProductGrid>

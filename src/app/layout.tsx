@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
+import { WishlistProvider } from "@/lib/wishlist-context";
 import { Navbar } from "@/components/Navbar";
+import { SiteFooter } from "@/components/SiteFooter";
+import { CartDrawer } from "@/components/CartDrawer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -22,12 +25,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
-        <CartProvider>
-          <Navbar />
-          <main className="flex-1 flex flex-col">
-            {children}
-          </main>
-        </CartProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <Navbar />
+            <main className="flex-1 flex flex-col">
+              {children}
+            </main>
+            <SiteFooter />
+            <CartDrawer />
+          </CartProvider>
+        </WishlistProvider>
       </body>
     </html>
   );

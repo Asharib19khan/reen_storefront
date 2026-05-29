@@ -2,62 +2,117 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, ChevronRight, ChevronDown, Heart } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { useWishlist } from "@/lib/wishlist-context";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { NavDropdown } from "./NavDropdown";
+import { SearchDialog } from "./SearchDialog";
+import {
+  BRAND_NAV_SECTIONS,
+  TOP_NAV_LINKS,
+  type NavSection,
+} from "@/lib/nav-config";
+import { cn } from "@/lib/utils";
+
+function MobileNavSection({
+  section,
+  expanded,
+  onToggle,
+  onNavigate,
+}: {
+  section: NavSection;
+  expanded: boolean;
+  onToggle: () => void;
+  onNavigate: () => void;
+}) {
+  return (
+    <div className="px-4 mb-2">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex items-center justify-between w-full py-3 text-sm font-semibold tracking-widest uppercase text-foreground/90 hover:text-primary"
+        aria-expanded={expanded}
+      >
+        {section.label}
+        {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+      </button>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="flex flex-col pl-4 py-2 border-l border-primary/20 ml-2 space-y-3">
+              {section.links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "text-sm transition-colors hover:text-primary",
+                    link.highlight ? "font-medium text-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function Navbar() {
-  const { items } = useCart();
+  const { items, openCart } = useCart();
+  const { items: wishlistItems } = useWishlist();
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+  const wishlistCount = wishlistItems.length;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [expandedSection, setExpandedSection] = useState<string | null>("Home");
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
+
+  const toggleSection = (id: string) => {
+    setExpandedSection((current) => (current === id ? null : id));
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto flex min-h-20 py-2 md:h-24 items-center justify-between px-4 w-full overflow-hidden">
-        <div className="flex gap-4 md:gap-10 items-center shrink-0">
+      <div className="max-w-7xl mx-auto flex min-h-20 py-2 md:h-24 items-center justify-between px-4 w-full">
+        <div className="flex gap-4 md:gap-8 lg:gap-10 items-center shrink-0 min-w-0">
           <Link href="/" className="flex items-center shrink-0">
-            <Image src="/logo.png" alt="Reens Logo" width={250} height={250} className="h-14 sm:h-20 md:h-24 lg:h-28 w-auto object-contain drop-shadow-xl" priority />
+            <Image
+              src="/logo.png"
+              alt="Reens Logo"
+              width={250}
+              height={250}
+              className="h-14 sm:h-20 md:h-24 lg:h-28 w-auto object-contain drop-shadow-xl"
+              priority
+            />
           </Link>
-          <nav className="hidden md:flex gap-8 items-center pt-1">
-            <Link
-              href="/"
-              className="flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary"
-            >
-              Home
-            </Link>
-            <Link
-              href="/shop?brand=byreen_xo"
-              className="flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary"
-            >
-              byreen.xo
-            </Link>
-            <Link
-              href="/shop?brand=luxereen_wears"
-              className="flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary"
-            >
-              luxereen.wears
-            </Link>
-            <Link
-              href="/contact"
-              className="flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary"
-            >
-              Contact Us
-            </Link>
-            <Link
-              href="/about"
-              className="flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary"
-            >
-              About Us
-            </Link>
+          <nav className="hidden md:flex gap-6 lg:gap-8 items-center pt-1">
+            {BRAND_NAV_SECTIONS.map((section) => (
+              <NavDropdown key={section.id} section={section} />
+            ))}
+            {TOP_NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
-        <div className="flex items-center justify-end space-x-2 md:space-x-4">
+        <div className="flex items-center justify-end space-x-2 md:space-x-4 shrink-0">
           <button
             type="button"
             className="md:hidden p-2 rounded-md hover:bg-muted transition-colors"
@@ -66,18 +121,35 @@ export function Navbar() {
           >
             <Menu className="h-6 w-6 text-foreground" />
           </button>
-          <nav className="flex items-center space-x-2">
-            <Link href="/cart" className="relative p-2">
+          <nav className="flex items-center space-x-1">
+            <SearchDialog />
+            <Link href="/wishlist" className="relative p-2" aria-label="Wishlist">
+              <Heart className="h-6 w-6 text-foreground hover:text-primary transition-colors" />
+              {wishlistCount > 0 && (
+                <Badge
+                  className="absolute top-0 right-0 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"
+                  variant="default"
+                >
+                  {wishlistCount}
+                </Badge>
+              )}
+            </Link>
+            <button
+              type="button"
+              onClick={openCart}
+              className="relative p-2"
+              aria-label="Open cart"
+            >
               <ShoppingBag className="h-6 w-6 text-foreground hover:text-primary transition-colors" />
               {itemCount > 0 && (
-                <Badge 
+                <Badge
                   className="absolute top-0 right-0 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"
                   variant="default"
                 >
                   {itemCount}
                 </Badge>
               )}
-            </Link>
+            </button>
           </nav>
         </div>
       </div>
@@ -89,7 +161,7 @@ export function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={toggleSidebar}
+              onClick={closeSidebar}
               className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
             />
             <motion.div
@@ -101,92 +173,39 @@ export function Navbar() {
             >
               <div className="flex items-center justify-between p-6 border-b">
                 <span className="font-serif text-xl tracking-widest uppercase">Menu</span>
-                <button onClick={toggleSidebar} className="p-2 hover:bg-muted rounded-full transition-colors">
+                <button
+                  type="button"
+                  onClick={closeSidebar}
+                  className="p-2 hover:bg-muted rounded-full transition-colors"
+                  aria-label="Close menu"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto py-4">
-                {/* Home Section */}
-                <div className="px-4 mb-2">
-                  <button 
-                    onClick={() => setExpandedSection(expandedSection === "Home" ? null : "Home")}
-                    className="flex items-center justify-between w-full py-3 text-sm font-semibold tracking-widest uppercase text-foreground/90 hover:text-primary"
-                  >
-                    Home
-                    {expandedSection === "Home" ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </button>
-                  <AnimatePresence>
-                    {expandedSection === "Home" && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                        <div className="flex flex-col pl-4 py-2 border-l border-primary/20 ml-2 space-y-3">
-                          <Link href="/#best-selling" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Best Selling</Link>
-                          <Link href="/#new-arrival" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">New Arrival</Link>
-                          <Link href="/#reviews" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Customer Reviews</Link>
-                          <Link href="/#byreen-xo-featured" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">byreen.xo Featured</Link>
-                          <Link href="/#luxereen-wears-featured" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">luxereen.wears Featured</Link>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* byreen.xo Section */}
-                <div className="px-4 mb-2">
-                  <button 
-                    onClick={() => setExpandedSection(expandedSection === "byreen.xo" ? null : "byreen.xo")}
-                    className="flex items-center justify-between w-full py-3 text-sm font-semibold tracking-widest uppercase text-foreground/90 hover:text-primary"
-                  >
-                    byreen.xo
-                    {expandedSection === "byreen.xo" ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </button>
-                  <AnimatePresence>
-                    {expandedSection === "byreen.xo" && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                        <div className="flex flex-col pl-4 py-2 border-l border-primary/20 ml-2 space-y-3">
-                          <Link href="/shop?brand=byreen_xo" onClick={toggleSidebar} className="text-sm font-medium text-foreground hover:text-primary transition-colors">Shop All</Link>
-                          <Link href="/shop?brand=byreen_xo#new-arrivals" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">New Arrival</Link>
-                          <Link href="/shop?brand=byreen_xo#rings" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Rings</Link>
-                          <Link href="/shop?brand=byreen_xo#bracelets-anklets" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Bracelets & Anklets</Link>
-                          <Link href="/shop?brand=byreen_xo#earrings" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Earrings</Link>
-                          <Link href="/shop?brand=byreen_xo#necklaces" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Necklaces</Link>
-                          <Link href="/shop?brand=byreen_xo#bangles" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Bangles (Churiyaan)</Link>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* luxereen.wears Section */}
-                <div className="px-4 mb-2">
-                  <button 
-                    onClick={() => setExpandedSection(expandedSection === "luxereen.wears" ? null : "luxereen.wears")}
-                    className="flex items-center justify-between w-full py-3 text-sm font-semibold tracking-widest uppercase text-foreground/90 hover:text-primary"
-                  >
-                    luxereen.wears
-                    {expandedSection === "luxereen.wears" ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </button>
-                  <AnimatePresence>
-                    {expandedSection === "luxereen.wears" && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                        <div className="flex flex-col pl-4 py-2 border-l border-primary/20 ml-2 space-y-3">
-                          <Link href="/shop?brand=luxereen_wears" onClick={toggleSidebar} className="text-sm font-medium text-foreground hover:text-primary transition-colors">Shop All</Link>
-                          <Link href="/shop?brand=luxereen_wears#new-arrivals" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">New Arrival</Link>
-                          <Link href="/shop?brand=luxereen_wears#corset-co-ord-sets" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Corset Co-ord Sets</Link>
-                          <Link href="/shop?brand=luxereen_wears#solid-casual-two-piece-co-ords" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Solid & Casual Two-Piece</Link>
-                          <Link href="/shop?brand=luxereen_wears#fusion-printed-kurtis" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Fusion & Printed Kurtis</Link>
-                          <Link href="/shop?brand=luxereen_wears#traditional-fusion-coordinates" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Traditional Fusion</Link>
-                          <Link href="/shop?brand=luxereen_wears#western-fusion-skirt-outfits" onClick={toggleSidebar} className="text-sm text-muted-foreground hover:text-primary transition-colors">Western-Fusion & Skirt Outfits</Link>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                {BRAND_NAV_SECTIONS.map((section) => (
+                  <MobileNavSection
+                    key={section.id}
+                    section={section}
+                    expanded={expandedSection === section.id}
+                    onToggle={() => toggleSection(section.id)}
+                    onNavigate={closeSidebar}
+                  />
+                ))}
               </div>
-              
+
               <div className="p-6 border-t mt-auto bg-muted/30">
-                <Link href="/about" onClick={toggleSidebar} className="block py-2 text-sm font-medium hover:text-primary transition-colors">About Us</Link>
-                <Link href="/contact" onClick={toggleSidebar} className="block py-2 text-sm font-medium hover:text-primary transition-colors">Contact Us</Link>
+                {TOP_NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={closeSidebar}
+                    className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
               </div>
             </motion.div>
           </>

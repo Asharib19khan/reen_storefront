@@ -1,0 +1,61 @@
+.byreen-shop {
+  --byreen-blush: #fdf2f8;
+  --byreen-rose: #f9a8d4;
+  --byreen-deep: #831843;
+  background: #fdf2f8;
+  min-height: 100vh;
+}
+
+.byreen-masonry {
+  columns: 2;
+  column-gap: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .byreen-masonry {
+    columns: 3;
+    column-gap: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .byreen-masonry {
+    columns: 4;
+    column-gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .byreen-masonry {
+    columns: 5;
+    column-gap: 1.25rem;
+  }
+}
+
+.byreen-masonry-item {
+  break-inside: avoid;
+  margin-bottom: 0.875rem;
+}
+
+.byreen-pin {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+
+.byreen-pin:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -12px rgba(190, 24, 93, 0.2);
+}
+
+.byreen-section-title {
+  font-family: var(--font-byreen-display), ui-serif, Georgia, serif;
+  letter-spacing: 0.01em;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
