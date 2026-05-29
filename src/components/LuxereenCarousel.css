@@ -52,9 +52,10 @@
     display: block;
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
     text-decoration: none;
     color: inherit;
+    pointer-events: auto;
 }
 
 .carousel__item[data-active] .carousel__image-link {
@@ -66,9 +67,15 @@
     z-index: 3;
 }
 
+.carousel__contents {
+    pointer-events: none;
+}
+
 .carousel__item[data-active] .carousel__product-link,
 .carousel__item[data-active] .carousel__view-details,
-.carousel__item[data-active] .carousel__add-to-cart {
+.carousel__item[data-active] .carousel__add-to-cart,
+.carousel__contents a,
+.carousel__contents button {
     pointer-events: auto;
     position: relative;
     z-index: 4;
@@ -501,6 +508,12 @@
 .carousel--compact .carousel__item:not([data-active]) .carousel__view-details {
     opacity: 0 !important;
     pointer-events: none;
+}
+
+.carousel--compact .carousel__item:not([data-active]) .carousel__image-link {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 2;
 }
 
 .carousel--compact .carousel__item[data-active] .carousel__contents .user__title,

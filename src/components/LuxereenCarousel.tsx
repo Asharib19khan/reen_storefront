@@ -89,6 +89,10 @@ function buildCartPayload(product: Product) {
   };
 }
 
+function isInteractiveTarget(target: EventTarget | null) {
+  return Boolean((target as HTMLElement | null)?.closest("a, button, input, textarea, select, label"));
+}
+
 const CarouselInstance = memo(function CarouselInstance({
   slides,
   isCompact,
@@ -127,7 +131,7 @@ const CarouselInstance = memo(function CarouselInstance({
       const $slides = getSlides();
       $slides.forEach((el) => el.removeAttribute("data-active"));
       $slide.setAttribute("data-active", "true");
-      ($slide as HTMLElement).focus();
+      ($slide as HTMLElement).focus({ preventScroll: true });
     },
     [getSlides]
   );
@@ -197,21 +201,14 @@ const CarouselInstance = memo(function CarouselInstance({
     const nextBtn = nextRef.current;
     if (!list || !prevBtn || !nextBtn) return;
 
-    const isInteractiveTarget = (target: HTMLElement | null) =>
-      Boolean(target?.closest("a, button, input, textarea, select, label"));
-
     const chooseSlide = (e: Event) => {
+      if (isCompactRef.current) return;
+
       const target = e.target as HTMLElement | null;
       if (isInteractiveTarget(target)) return;
 
       const $slide = target?.closest(".carousel__item") || null;
       if (!$slide) return;
-
-      if (isCompactRef.current) {
-        pauseAuto();
-        activateSlide($slide);
-        return;
-      }
 
       const max = window.matchMedia("screen and ( max-width: 600px)").matches ? 5 : 8;
       const index = getSlideIndex($slide);
@@ -231,32 +228,25 @@ const CarouselInstance = memo(function CarouselInstance({
       prevSlide();
     };
 
-    const handleSlideClick = (e: Event) => {
-      const target = e.target as HTMLElement | null;
-      if (isInteractiveTarget(target)) return;
+    const handleSlideFocus = (e: FocusEvent) => {
+      if (isCompactRef.current) return;
+      if (isInteractiveTarget(e.target)) return;
       pauseAuto();
       chooseSlide(e);
     };
 
-    const handleSlidePointerClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (isInteractiveTarget(target)) return;
-
-      const $slide = target?.closest(".carousel__item") || null;
-      if (!$slide || $slide.hasAttribute("data-active")) return;
-
-      pauseAuto();
-      activateSlide($slide);
-    };
-
     const handleSlideKey = (e: KeyboardEvent) => {
+      if (isInteractiveTarget(e.target)) return;
+
       switch (e.keyCode) {
         case 37:
         case 65:
+          e.preventDefault();
           handlePrevClick();
           break;
         case 39:
         case 68:
+          e.preventDefault();
           handleNextClick();
           break;
       }
@@ -264,26 +254,24 @@ const CarouselInstance = memo(function CarouselInstance({
 
     nextBtn.addEventListener("click", handleNextClick);
     prevBtn.addEventListener("click", handlePrevClick);
-    list.addEventListener("focusin", handleSlideClick);
-    list.addEventListener("click", handleSlidePointerClick);
+    list.addEventListener("focusin", handleSlideFocus);
     list.addEventListener("keyup", handleSlideKey);
 
     return () => {
       nextBtn.removeEventListener("click", handleNextClick);
       prevBtn.removeEventListener("click", handlePrevClick);
-      list.removeEventListener("focusin", handleSlideClick);
-      list.removeEventListener("click", handleSlidePointerClick);
+      list.removeEventListener("focusin", handleSlideFocus);
       list.removeEventListener("keyup", handleSlideKey);
     };
   }, [activateSlide, getSlideIndex, nextSlide, pauseAuto, prevSlide]);
 
-  const handleInactiveImageClick = (e: React.MouseEvent, slide: HTMLElement) => {
-    e.preventDefault();
+  const handleProductNavigate = (e: React.MouseEvent) => {
+    e.stopPropagation();
     pauseAuto();
-    activateSlide(slide);
   };
 
   const handleAddToCartClick = (product: Product, e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     const quantity = Number(product.quantity);
     const isSoldOut = !Number.isFinite(quantity) || quantity <= 0;
@@ -300,7 +288,6 @@ const CarouselInstance = memo(function CarouselInstance({
           const isSoldOut = !Number.isFinite(quantity) || quantity <= 0;
           const priceValue = Number(product.price);
           const hasPrice = Number.isFinite(priceValue) && priceValue >= 0;
-
           const productHref = `/product/${product.id}`;
 
           return (
@@ -308,20 +295,13 @@ const CarouselInstance = memo(function CarouselInstance({
               key={key}
               className="carousel__item"
               data-active={isActive ? "true" : undefined}
-              tabIndex={0}
+              tabIndex={-1}
             >
               <Link
                 href={productHref}
                 className="carousel__image-link"
                 aria-label={`View ${product.title}`}
-                onClick={(e) => {
-                  const slide = e.currentTarget.closest(".carousel__item");
-                  if (slide && !slide.hasAttribute("data-active")) {
-                    handleInactiveImageClick(e, slide as HTMLElement);
-                  } else {
-                    pauseAuto();
-                  }
-                }}
+                onClick={handleProductNavigate}
               >
                 {imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -331,17 +311,13 @@ const CarouselInstance = memo(function CarouselInstance({
                 )}
               </Link>
               <div className="carousel__contents">
-                <Link
-                  href={productHref}
-                  className="user__name carousel__product-link"
-                  onClick={() => pauseAuto()}
-                >
+                <Link href={productHref} className="user__name carousel__product-link" onClick={handleProductNavigate}>
                   {product.title}
                 </Link>
                 <h3 className="user__title">
                   {isSoldOut ? "Sold Out" : hasPrice ? `Rs. ${priceValue.toLocaleString()}` : "Contact"}
                 </h3>
-                <Link href={productHref} className="carousel__view-details" onClick={() => pauseAuto()}>
+                <Link href={productHref} className="carousel__view-details" onClick={handleProductNavigate}>
                   View details
                 </Link>
                 <button
@@ -394,7 +370,7 @@ export function LuxereenCarousel({ products, title, id }: { products: Product[];
   }
 
   return (
-    <div id={id} className="mb-20 pt-20 -mt-20">
+    <div id={id} className="mb-20 pt-20 -mt-20 scroll-mt-24">
       <h2 className="text-2xl md:text-3xl font-serif mb-8 pb-4 border-b border-border/50 uppercase tracking-widest">{title}</h2>
       <CarouselInstance slides={slides} isCompact={isCompact} onAddToCartRef={onAddToCartRef} />
     </div>
