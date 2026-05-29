@@ -103,8 +103,6 @@ const CarouselInstance = memo(function CarouselInstance({
   onAddToCartRef: React.RefObject<(product: Product) => void>;
 }) {
   const listRef = useRef<HTMLUListElement | null>(null);
-  const prevRef = useRef<HTMLButtonElement | null>(null);
-  const nextRef = useRef<HTMLButtonElement | null>(null);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pauserRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isCompactRef = useRef(isCompact);
@@ -197,9 +195,7 @@ const CarouselInstance = memo(function CarouselInstance({
 
   useEffect(() => {
     const list = listRef.current;
-    const prevBtn = prevRef.current;
-    const nextBtn = nextRef.current;
-    if (!list || !prevBtn || !nextBtn) return;
+    if (!list) return;
 
     const chooseSlide = (e: Event) => {
       if (isCompactRef.current) return;
@@ -218,16 +214,6 @@ const CarouselInstance = memo(function CarouselInstance({
       activateSlide($slide);
     };
 
-    const handleNextClick = () => {
-      pauseAuto();
-      nextSlide();
-    };
-
-    const handlePrevClick = () => {
-      pauseAuto();
-      prevSlide();
-    };
-
     const handleSlideFocus = (e: FocusEvent) => {
       if (isCompactRef.current) return;
       if (isInteractiveTarget(e.target)) return;
@@ -242,28 +228,38 @@ const CarouselInstance = memo(function CarouselInstance({
         case 37:
         case 65:
           e.preventDefault();
-          handlePrevClick();
+          pauseAuto();
+          prevSlide();
           break;
         case 39:
         case 68:
           e.preventDefault();
-          handleNextClick();
+          pauseAuto();
+          nextSlide();
           break;
       }
     };
 
-    nextBtn.addEventListener("click", handleNextClick);
-    prevBtn.addEventListener("click", handlePrevClick);
     list.addEventListener("focusin", handleSlideFocus);
     list.addEventListener("keyup", handleSlideKey);
 
     return () => {
-      nextBtn.removeEventListener("click", handleNextClick);
-      prevBtn.removeEventListener("click", handlePrevClick);
       list.removeEventListener("focusin", handleSlideFocus);
       list.removeEventListener("keyup", handleSlideKey);
     };
   }, [activateSlide, getSlideIndex, nextSlide, pauseAuto, prevSlide]);
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const slide = e.currentTarget.closest(".carousel__item");
+    if (slide && !slide.hasAttribute("data-active")) {
+      e.preventDefault();
+      pauseAuto();
+      activateSlide(slide);
+      return;
+    }
+    pauseAuto();
+  };
 
   const handleProductNavigate = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -301,7 +297,7 @@ const CarouselInstance = memo(function CarouselInstance({
                 href={productHref}
                 className="carousel__image-link"
                 aria-label={`View ${product.title}`}
-                onClick={handleProductNavigate}
+                onClick={handleImageClick}
               >
                 {imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -333,20 +329,6 @@ const CarouselInstance = memo(function CarouselInstance({
           );
         })}
       </ul>
-      <div className="carousel__nav">
-        <button type="button" className="prev" ref={prevRef}>
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M9.586 4l-6.586 6.586a2 2 0 0 0 0 2.828l6.586 6.586a2 2 0 0 0 2.18 .434l.145 -.068a2 2 0 0 0 1.089 -1.78v-2.586h7a2 2 0 0 0 2 -2v-4l-.005 -.15a2 2 0 0 0 -1.995 -1.85l-7 -.001v-2.585a2 2 0 0 0 -3.414 -1.414z" />
-          </svg>
-          <span>prev</span>
-        </button>
-        <button type="button" className="next" ref={nextRef}>
-          <span>next</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12.089 3.634a2 2 0 0 0 -1.089 1.78l-.001 2.586h-6.999a2 2 0 0 0 -2 2v4l.005 .15a2 2 0 0 0 1.995 1.85l6.999 -.001l.001 2.587a2 2 0 0 0 3.414 1.414l6.586 -6.586a2 2 0 0 0 0 -2.828l-6.586 -6.586a2 2 0 0 0 -2.18 -.434l-.145 .068z" />
-          </svg>
-        </button>
-      </div>
     </section>
   );
 }, (prev, next) => {
