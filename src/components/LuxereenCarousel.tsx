@@ -1,6 +1,8 @@
 "use client";
 
 import React, { memo, useCallback, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import "./LuxereenCarousel.css";
 
@@ -102,6 +104,7 @@ const CarouselInstance = memo(function CarouselInstance({
   const nextRef = useRef<HTMLButtonElement | null>(null);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pauserRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const router = useRouter();
   const isCompactRef = useRef(isCompact);
   isCompactRef.current = isCompact;
 
@@ -262,10 +265,8 @@ const CarouselInstance = memo(function CarouselInstance({
     if (!slide) return;
 
     if (slide.hasAttribute("data-active")) {
-      const quantity = Number(product.quantity);
-      const isSoldOut = !Number.isFinite(quantity) || quantity <= 0;
-      if (isSoldOut) return;
-      onAddToCartRef.current?.(product);
+      pauseAuto();
+      router.push(`/product/${product.id}`);
       return;
     }
 
@@ -306,10 +307,26 @@ const CarouselInstance = memo(function CarouselInstance({
                 )}
               </div>
               <div className="carousel__contents">
-                <h2 className="user__name">{product.title}</h2>
+                <Link
+                  href={`/product/${product.id}`}
+                  className="user__name carousel__product-link"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {product.title}
+                </Link>
                 <h3 className="user__title">
                   {isSoldOut ? "Sold Out" : hasPrice ? `Rs. ${priceValue.toLocaleString()}` : "Contact"}
                 </h3>
+                <Link
+                  href={`/product/${product.id}`}
+                  className="carousel__view-details"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    pauseAuto();
+                  }}
+                >
+                  View details
+                </Link>
                 <button
                   type="button"
                   className="carousel__add-to-cart"
