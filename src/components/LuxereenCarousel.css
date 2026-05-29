@@ -50,6 +50,11 @@
 .carousel__item:hover {
     flex-basis: calc( var(--width) / 2 );
     transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.carousel__item[data-active]:hover {
+    flex-basis: var(--width);
 }
 
 .carousel__item[data-active] {
@@ -349,15 +354,32 @@
 
 .carousel--compact .carousel__item:not([data-active]) {
     flex: 0 0 clamp(160px, 32vw, 280px) !important;
+    cursor: pointer;
 }
 
 .carousel--compact .carousel__item[data-active] {
     flex: 0 0 clamp(220px, 48vw, var(--width)) !important;
 }
 
+.carousel--compact .carousel__item:not([data-active]):hover,
+.carousel--compact .carousel__item:not([data-active]):focus-within {
+    flex: 0 0 clamp(200px, 40vw, calc(var(--width) / 2)) !important;
+    transition: all 0.3s ease;
+}
+
 .carousel--compact .carousel__item::after {
     opacity: 0 !important;
     transform: none !important;
+}
+
+.carousel--compact .carousel__item:not([data-active]):hover::after,
+.carousel--compact .carousel__item:not([data-active]):focus-within::after {
+    opacity: 0.55 !important;
+}
+
+.carousel--compact .carousel__item:not([data-active]):hover img,
+.carousel--compact .carousel__item:not([data-active]):focus-within img {
+    filter: saturate(0.55) contrast(0.9) brightness(1.08) !important;
 }
 
 .carousel--compact .carousel__image,
