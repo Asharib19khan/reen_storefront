@@ -25,33 +25,33 @@ export async function SiteFooter() {
   };
 
   return (
-    <footer className="border-t bg-muted/20 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    <footer className="border-t border-border/50 bg-background mt-auto transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="lg:col-span-1">
-            <Link href="/" className="inline-block mb-4">
-              <Image src="/logo.png" alt="Reens" width={120} height={120} className="h-16 w-auto object-contain" />
+            <Link href="/" className="inline-block mb-6">
+              <Image src="/logo.png" alt="Reens" width={140} height={140} className="h-16 w-auto object-contain transition-transform duration-300 hover:scale-105" />
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs font-medium">
               byreen.xo jewelry & luxereen.wears clothing — curated for the modern Pakistani woman.
             </p>
             <a
               href="https://instagram.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 mt-4 text-sm text-muted-foreground hover:text-primary transition-colors"
+              className="inline-flex items-center gap-2 mt-6 text-sm font-medium text-muted-foreground hover:text-primary transition-colors group"
             >
-              <InstagramIcon className="h-5 w-5" />
-              @byreen.xo
+              <InstagramIcon className="h-5 w-5 transition-transform group-hover:scale-110" />
+              <span className="link-underline">@byreen.xo</span>
             </a>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest mb-4">Shop</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-serif font-semibold uppercase tracking-widest mb-6 text-foreground">Shop</h3>
+            <ul className="space-y-3">
               {FOOTER_LINKS.shop.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link href={link.href} className="inline-block py-1 text-sm text-muted-foreground hover:text-primary transition-colors link-underline">
                     {link.label}
                   </Link>
                 </li>
@@ -60,11 +60,11 @@ export async function SiteFooter() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest mb-4">Company</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-serif font-semibold uppercase tracking-widest mb-6 text-foreground">Company</h3>
+            <ul className="space-y-3">
               {FOOTER_LINKS.company.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link href={link.href} className="inline-block py-1 text-sm text-muted-foreground hover:text-primary transition-colors link-underline">
                     {link.label}
                   </Link>
                 </li>
@@ -73,23 +73,23 @@ export async function SiteFooter() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest mb-4">Policies</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-serif font-semibold uppercase tracking-widest mb-6 text-foreground">Policies</h3>
+            <ul className="space-y-3">
               {FOOTER_LINKS.policies.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link href={link.href} className="inline-block py-1 text-sm text-muted-foreground hover:text-primary transition-colors link-underline">
                     {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
-            <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+            <p className="text-xs text-muted-foreground/80 mt-8 leading-relaxed font-medium">
               Nationwide delivery across Pakistan. COD available at checkout.
             </p>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t text-center text-xs text-muted-foreground">
+        <div className="mt-16 pt-8 border-t border-border/50 text-center text-sm font-medium text-muted-foreground/80">
           © {new Date().getFullYear()} Reens · byreen.xo & luxereen.wears. All rights reserved.
         </div>
       </div>

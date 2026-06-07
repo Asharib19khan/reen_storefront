@@ -92,7 +92,7 @@ export function Navbar() {
   });
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/85 backdrop-blur-xl transition-all duration-300">
       <div className="max-w-7xl mx-auto flex min-h-20 py-2 md:h-24 items-center justify-between px-4 w-full">
         <div className="flex gap-4 md:gap-8 lg:gap-10 items-center shrink-0 min-w-0">
           <Link href="/" className="flex items-center shrink-0">
@@ -101,7 +101,7 @@ export function Navbar() {
               alt="Reens Logo"
               width={250}
               height={250}
-              className="h-14 sm:h-20 md:h-24 lg:h-28 w-auto object-contain drop-shadow-xl"
+              className="h-14 sm:h-20 md:h-24 lg:h-28 w-auto object-contain transition-transform duration-300 hover:scale-105"
               priority
             />
           </Link>
@@ -113,7 +113,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary"
+                className="link-underline flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary py-2"
               >
                 {link.label}
               </Link>
@@ -132,7 +132,7 @@ export function Navbar() {
           <nav className="flex items-center space-x-1">
             <SearchDialog />
             <Link href="/wishlist" className="relative p-2" aria-label="Wishlist">
-              <Heart className="h-6 w-6 text-foreground hover:text-primary transition-colors" />
+              <Heart className="h-6 w-6 text-foreground hover:text-primary transition-transform hover:scale-110" />
               {wishlistCount > 0 && (
                 <Badge
                   className="absolute top-0 right-0 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"
@@ -148,7 +148,7 @@ export function Navbar() {
               className="relative p-2"
               aria-label="Open cart"
             >
-              <ShoppingBag className="h-6 w-6 text-foreground hover:text-primary transition-colors" />
+              <ShoppingBag className="h-6 w-6 text-foreground hover:text-primary transition-transform hover:scale-110" />
               {itemCount > 0 && (
                 <Badge
                   className="absolute top-0 right-0 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"
