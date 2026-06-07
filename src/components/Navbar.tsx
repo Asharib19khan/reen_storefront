@@ -16,6 +16,7 @@ import {
   type NavSection,
 } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
+import { useStorefrontSettings } from "@/lib/settings-context";
 
 function MobileNavSection({
   section,
@@ -72,6 +73,7 @@ function MobileNavSection({
 export function Navbar() {
   const { items, openCart } = useCart();
   const { items: wishlistItems } = useWishlist();
+  const { hideByreenXo, hideLuxereenWears } = useStorefrontSettings();
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -82,6 +84,12 @@ export function Navbar() {
   const toggleSection = (id: string) => {
     setExpandedSection((current) => (current === id ? null : id));
   };
+
+  const visibleNavSections = BRAND_NAV_SECTIONS.filter((section) => {
+    if (section.id === "byreen-xo" && hideByreenXo) return false;
+    if (section.id === "luxereen-wears" && hideLuxereenWears) return false;
+    return true;
+  });
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md">
@@ -98,7 +106,7 @@ export function Navbar() {
             />
           </Link>
           <nav className="hidden md:flex gap-6 lg:gap-8 items-center pt-1">
-            {BRAND_NAV_SECTIONS.map((section) => (
+            {visibleNavSections.map((section) => (
               <NavDropdown key={section.id} section={section} />
             ))}
             {TOP_NAV_LINKS.map((link) => (
@@ -184,7 +192,7 @@ export function Navbar() {
               </div>
 
               <div className="flex-1 overflow-y-auto py-4">
-                {BRAND_NAV_SECTIONS.map((section) => (
+                {visibleNavSections.map((section) => (
                   <MobileNavSection
                     key={section.id}
                     section={section}

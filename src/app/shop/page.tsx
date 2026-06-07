@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { ProductCard } from "@/components/ProductCard";
 import { ByreenHoverCard } from "@/components/byreen/ByreenHoverCard";
@@ -9,6 +10,7 @@ import { ShopToolbar } from "@/components/ShopToolbar";
 import { pickLatestBanner } from "@/lib/utils";
 import { filterProducts, sortProducts, getUniqueCategories, type SortOption } from "@/lib/shop-utils";
 import type { StoreProduct, ShopChip } from "@/lib/product-types";
+import { getStorefrontSettings } from "@/lib/settings";
 
 export const revalidate = 60;
 
@@ -50,6 +52,15 @@ export default async function ShopPage({
   const inStockOnly = resolvedParams.stock === "in";
   const newArrivalsOnly = resolvedParams.filter === "new";
   const searchQuery = resolvedParams.q;
+
+  const { hideByreenXo, hideLuxereenWears } = await getStorefrontSettings();
+
+  if (brand === "byreen_xo" && hideByreenXo) {
+    redirect("/shop");
+  }
+  if (brand === "luxereen_wears" && hideLuxereenWears) {
+    redirect("/shop");
+  }
 
   const supabase = getSupabase();
 

@@ -1,25 +1,29 @@
 import Link from "next/link";
 import Image from "next/image";
 import { InstagramIcon } from "@/components/icons/social-icons";
+import { getStorefrontSettings } from "@/lib/settings";
 
-const FOOTER_LINKS = {
-  shop: [
-    { label: "byreen.xo", href: "/shop?brand=byreen_xo" },
-    { label: "luxereen.wears", href: "/shop?brand=luxereen_wears" },
-    { label: "Shop All", href: "/shop" },
-    { label: "Wishlist", href: "/wishlist" },
-  ],
-  company: [
-    { label: "About Us", href: "/about" },
-    { label: "Contact Us", href: "/contact" },
-  ],
-  policies: [
-    { label: "Shipping", href: "/contact#shipping" },
-    { label: "Returns & Exchanges", href: "/contact#returns" },
-  ],
-};
+export async function SiteFooter() {
+  const { hideByreenXo, hideLuxereenWears } = await getStorefrontSettings();
 
-export function SiteFooter() {
+  const shopLinks = [];
+  if (!hideByreenXo) shopLinks.push({ label: "byreen.xo", href: "/shop?brand=byreen_xo" });
+  if (!hideLuxereenWears) shopLinks.push({ label: "luxereen.wears", href: "/shop?brand=luxereen_wears" });
+  shopLinks.push({ label: "Shop All", href: "/shop" });
+  shopLinks.push({ label: "Wishlist", href: "/wishlist" });
+
+  const FOOTER_LINKS = {
+    shop: shopLinks,
+    company: [
+      { label: "About Us", href: "/about" },
+      { label: "Contact Us", href: "/contact" },
+    ],
+    policies: [
+      { label: "Shipping", href: "/contact#shipping" },
+      { label: "Returns & Exchanges", href: "/contact#returns" },
+    ],
+  };
+
   return (
     <footer className="border-t bg-muted/20 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">

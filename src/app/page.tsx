@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { AnimatedProductGrid } from "@/components/AnimatedProductGrid";
 import { pickLatestBanner } from "@/lib/utils";
+import { getStorefrontSettings } from "@/lib/settings";
 
 export const revalidate = 60;
 
 export default async function Home() {
   const supabase = getSupabase();
   const empty = { data: null as null };
+  const { hideByreenXo, hideLuxereenWears } = await getStorefrontSettings();
 
   const [
     { data: bestSelling },
@@ -24,8 +26,8 @@ export default async function Home() {
     ? await Promise.all([
         supabase.from("products").select("*").eq("is_active", true).eq("is_best_selling", true).limit(4),
         supabase.from("products").select("*").eq("is_active", true).eq("is_new_arrival", true).limit(4),
-        supabase.from("products").select("*").eq("is_active", true).eq("brand", "byreen_xo").limit(3),
-        supabase.from("products").select("*").eq("is_active", true).eq("brand", "luxereen_wears").limit(3),
+        hideByreenXo ? Promise.resolve(empty) : supabase.from("products").select("*").eq("is_active", true).eq("brand", "byreen_xo").limit(3),
+        hideLuxereenWears ? Promise.resolve(empty) : supabase.from("products").select("*").eq("is_active", true).eq("brand", "luxereen_wears").limit(3),
         supabase.from("hero_banners").select("*").in("title", ["Home_page_hero_desktop", "Home_page_hero_mobile"]).eq("is_active", true).order("created_at", { ascending: false }),
         supabase.from("customer_reviews").select("*").eq("is_approved", true).eq("is_featured", true).order("created_at", { ascending: false }).limit(3),
       ])
@@ -63,7 +65,7 @@ export default async function Home() {
         </section>
       )}
 
-      {byreenFeatured && byreenFeatured.length > 0 && (
+      {!hideByreenXo && byreenFeatured && byreenFeatured.length > 0 && (
         <section id="byreen-xo-featured" className="py-20 bg-muted/20 w-full border-y border-border/50">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
@@ -93,7 +95,7 @@ export default async function Home() {
         </section>
       )}
 
-      {luxereenFeatured && luxereenFeatured.length > 0 && (
+      {!hideLuxereenWears && luxereenFeatured && luxereenFeatured.length > 0 && (
         <section id="luxereen-wears-featured" className="py-20 bg-background w-full">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
