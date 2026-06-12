@@ -10,7 +10,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavDropdown } from "./NavDropdown";
-import { SearchDialog } from "./SearchDialog";
+import { ExpandableSearch } from "./ExpandableSearch";
 import {
   BRAND_NAV_SECTIONS,
   TOP_NAV_LINKS,
@@ -159,7 +159,7 @@ export function Navbar() {
             <Menu className="h-6 w-6" />
           </button>
           <nav className="flex items-center space-x-1">
-            <SearchDialog />
+            <ExpandableSearch isTransparent={isTransparent} />
             <Link href="/wishlist" className="relative p-2" aria-label="Wishlist">
               <Heart className={cn(
                 "h-6 w-6 transition-transform hover:scale-110",
