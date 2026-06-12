@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const CLOSE_DELAY_MS = 150;
 
-export function NavDropdown({ section }: { section: NavSection }) {
+export function NavDropdown({ section, isTransparent }: { section: NavSection, isTransparent?: boolean }) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,7 +37,10 @@ export function NavDropdown({ section }: { section: NavSection }) {
     >
       <Link
         href={section.href}
-        className="flex items-center gap-1 text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary py-2"
+        className={cn(
+          "flex items-center gap-1 text-xs tracking-widest uppercase font-semibold transition-colors hover:text-primary py-2",
+          isTransparent ? "text-white drop-shadow-md hover:text-white/80" : "text-foreground/80"
+        )}
         onFocus={showMenu}
       >
         {section.label}

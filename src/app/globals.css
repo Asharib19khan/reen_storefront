@@ -32,32 +32,32 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  --font-sans: var(--font-inter);
-  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
 }
 
 @layer base {
   :root {
-    --background: #FAF9F6; /* Premium soft cream */
-    --foreground: #2C1820; /* Deep rich charcoal/rose */
+    --background: #FFFDFD; /* Very subtle pink/white */
+    --foreground: #2A1B22; /* Soft deep taupe/rose-black */
     --card: #FFFFFF;
-    --card-foreground: #2C1820;
+    --card-foreground: #2A1B22;
     --popover: #FFFFFF;
-    --popover-foreground: #2C1820;
-    --primary: #8B2C46; /* Rich deep berry/rose */
+    --popover-foreground: #2A1B22;
+    --primary: #D4A5B4; /* Soft dusty rose / blush */
     --primary-foreground: #FFFFFF;
-    --secondary: #F3EAEF; /* Subtle rose-tinted gray */
-    --secondary-foreground: #4A2B35;
-    --muted: #F3EAEF;
-    --muted-foreground: #7E5F69;
-    --accent: #E8D5DF;
-    --accent-foreground: #4A2B35;
-    --destructive: #9C1A24;
+    --secondary: #F8F2F4; /* Ultra light blush for pills */
+    --secondary-foreground: #8B6E7B;
+    --muted: #F8F2F4;
+    --muted-foreground: #A8959D;
+    --accent: #FDF9FA;
+    --accent-foreground: #8B6E7B;
+    --destructive: #E07A5F; /* Soft terracotta red */
     --destructive-foreground: #FFFFFF;
-    --border: #E8D5DF;
-    --input: #E8D5DF;
-    --ring: #8B2C46;
-    --radius: 0.5rem;
+    --border: #F0E6EA;
+    --input: #F0E6EA;
+    --ring: #D4A5B4;
+    --radius: 1.5rem; /* Bubbly, large radius for Pinterest look */
   }
 }
 

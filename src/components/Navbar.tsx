@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, X, ChevronRight, ChevronDown, Heart } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useWishlist } from "@/lib/wishlist-context";
@@ -78,6 +79,15 @@ export function Navbar() {
   const wishlistCount = wishlistItems.length;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const closeSidebar = () => setIsSidebarOpen(false);
 
@@ -91,9 +101,19 @@ export function Navbar() {
     return true;
   });
 
+  const isTransparent = isHome && !isScrolled;
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/85 backdrop-blur-xl transition-all duration-300">
-      <div className="max-w-7xl mx-auto flex min-h-20 py-2 md:h-24 items-center justify-between px-4 w-full">
+    <header 
+      className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-500",
+        isTransparent 
+          ? "bg-transparent text-white border-transparent shadow-none" 
+          : "bg-background/80 text-foreground border-b border-border/40 backdrop-blur-3xl shadow-sm"
+      )}
+    >
+
+      <div className="max-w-[90rem] mx-auto flex min-h-20 md:min-h-24 items-center justify-between px-4 sm:px-6 lg:px-8 w-full py-2">
         <div className="flex gap-4 md:gap-8 lg:gap-10 items-center shrink-0 min-w-0">
           <Link href="/" className="flex items-center shrink-0">
             <Image
@@ -101,19 +121,25 @@ export function Navbar() {
               alt="Reens Logo"
               width={250}
               height={250}
-              className="h-14 sm:h-20 md:h-24 lg:h-28 w-auto object-contain transition-transform duration-300 hover:scale-105"
+              className={cn(
+                "h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 object-cover rounded-full transition-transform duration-300 hover:scale-105 shadow-sm",
+                isTransparent && "drop-shadow-md"
+              )}
               priority
             />
           </Link>
           <nav className="hidden md:flex gap-6 lg:gap-8 items-center pt-1">
             {visibleNavSections.map((section) => (
-              <NavDropdown key={section.id} section={section} />
+              <NavDropdown key={section.id} section={section} isTransparent={isTransparent} />
             ))}
             {TOP_NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="link-underline flex items-center text-xs tracking-widest uppercase font-semibold text-foreground/80 transition-colors hover:text-primary py-2"
+                className={cn(
+                  "link-underline flex items-center text-xs tracking-widest uppercase font-semibold transition-colors hover:text-primary py-2",
+                  isTransparent ? "text-white drop-shadow-md hover:text-white/80" : "text-foreground/80"
+                )}
               >
                 {link.label}
               </Link>
@@ -123,16 +149,22 @@ export function Navbar() {
         <div className="flex items-center justify-end space-x-2 md:space-x-4 shrink-0">
           <button
             type="button"
-            className="md:hidden p-2 rounded-md hover:bg-muted transition-colors"
+            className={cn(
+              "md:hidden p-2 rounded-md transition-colors",
+              isTransparent ? "text-white hover:bg-white/20" : "hover:bg-muted text-foreground"
+            )}
             onClick={() => setIsSidebarOpen(true)}
             aria-label="Open menu"
           >
-            <Menu className="h-6 w-6 text-foreground" />
+            <Menu className="h-6 w-6" />
           </button>
           <nav className="flex items-center space-x-1">
             <SearchDialog />
             <Link href="/wishlist" className="relative p-2" aria-label="Wishlist">
-              <Heart className="h-6 w-6 text-foreground hover:text-primary transition-transform hover:scale-110" />
+              <Heart className={cn(
+                "h-6 w-6 transition-transform hover:scale-110",
+                isTransparent ? "text-white drop-shadow-md" : "text-foreground hover:text-primary"
+              )} />
               {wishlistCount > 0 && (
                 <Badge
                   className="absolute top-0 right-0 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"
@@ -148,7 +180,10 @@ export function Navbar() {
               className="relative p-2"
               aria-label="Open cart"
             >
-              <ShoppingBag className="h-6 w-6 text-foreground hover:text-primary transition-transform hover:scale-110" />
+              <ShoppingBag className={cn(
+                "h-6 w-6 transition-transform hover:scale-110",
+                isTransparent ? "text-white drop-shadow-md" : "text-foreground hover:text-primary"
+              )} />
               {itemCount > 0 && (
                 <Badge
                   className="absolute top-0 right-0 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"

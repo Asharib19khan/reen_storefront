@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import anime from "animejs";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 interface Banner {
   id: string;
@@ -38,34 +39,47 @@ export function HeroCarousel({ desktopBanner, mobileBanner }: { desktopBanner: B
   }, [desktopBanner, mobileBanner]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <div ref={containerRef} className="relative w-full h-[100svh] bg-background flex items-center justify-center overflow-hidden">
       
       {/* Desktop Media */}
       {desktopBanner ? (
-        <div className="hidden md:block absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100">
+        <motion.div 
+          initial={{ scale: 1.05, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="hidden md:block absolute inset-0"
+        >
+          {/* Subtle gradient so the transparent navbar text is readable */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent z-10 pointer-events-none"></div>
           {desktopBanner.media_type === 'video' ? (
             <video src={desktopBanner.media_url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
           ) : (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img src={desktopBanner.media_url} alt={desktopBanner.title} className="w-full h-full object-cover" />
           )}
-        </div>
+        </motion.div>
       ) : (
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background"></div>
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-b from-primary/20 via-background to-background"></div>
       )}
 
       {/* Mobile Media */}
       {mobileBanner ? (
-        <div className="block md:hidden absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100">
+        <motion.div 
+          initial={{ scale: 1.05, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="block md:hidden absolute inset-0"
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent z-10 pointer-events-none"></div>
           {mobileBanner.media_type === 'video' ? (
             <video src={mobileBanner.media_url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
           ) : (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img src={mobileBanner.media_url} alt={mobileBanner.title} className="w-full h-full object-cover" />
           )}
-        </div>
+        </motion.div>
       ) : (
-        <div className="block md:hidden absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background"></div>
+        <div className="block md:hidden absolute inset-0 bg-gradient-to-b from-primary/20 via-background to-background"></div>
       )}
 
       {/* Floating particles fallback if no banners */}
