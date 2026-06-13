@@ -8,20 +8,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { CheckCircle2, Loader2, CreditCard, Banknote } from "lucide-react";
+import { CheckCircle2, Loader2, CreditCard, Banknote, MapPin, Copy, Check } from "lucide-react";
 
 export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
   const { items, totalAmount, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [isLocationTracked, setIsLocationTracked] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const [formData, setFormData] = useState({
     customer_name: "",
     customer_phone: "",
-    customer_address: "",
+    house_address: "",
+    area: "",
+    city: "",
+    province: "",
+    country: "",
+    zipcode: "",
     payment_method: "COD" // Default to Cash on Delivery
   });
+  
+  const [transactionId, setTransactionId] = useState("");
+  const [paymentPlatform, setPaymentPlatform] = useState("");
+
+  const isKarachi = formData.city?.toLowerCase().includes('karachi');
+  const deliveryCharge = formData.city.trim() ? (isKarachi ? 300 : 400) : 0;
+  const finalTotal = totalAmount + deliveryCharge;
 
   if (items.length === 0 && !orderId) {
     return (
@@ -48,10 +70,64 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
     );
   }
 
+  const validatePakistaniPhone = (phone: string) => {
+    // Allows formats like 03001234567, 0300 1234567, 0300-1234567, +923001234567
+    const regex = /^((\+92)|(0092))?-?0?3[0-9]{2}-?[ ]?[0-9]{7}$/;
+    return regex.test(phone.replace(/\s+/g, ''));
+  };
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          
+          if (data && data.address) {
+            setFormData(prev => ({
+              ...prev,
+              house_address: prev.house_address || data.address.house_number || "",
+              area: data.address.suburb || data.address.neighbourhood || data.address.residential || "",
+              city: data.address.city || data.address.town || data.address.village || "",
+              province: data.address.state || "",
+              country: data.address.country || "",
+              zipcode: data.address.postcode || ""
+            }));
+            setIsLocationTracked(true);
+          }
+        } catch (err) {
+          console.error("Error fetching location data:", err);
+          setError("Failed to fetch address details. Please enter manually.");
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (err) => {
+        setIsLocating(false);
+        setError("Location access denied or failed.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validatePakistaniPhone(formData.customer_phone)) {
+      setPhoneError("Please enter a valid Pakistani phone number (e.g., 03001234567)");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
+    setPhoneError(null);
 
     try {
       const supabase = getSupabase();
@@ -59,13 +135,19 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
         throw new Error("Store is not configured. Please try again later.");
       }
 
-      const fullAddress = `${formData.customer_address}\n\n[Payment Method: ${formData.payment_method}]`;
+      let paymentInfo = `[Payment Method: ${formData.payment_method}]`;
+      if (formData.payment_method === 'ONLINE') {
+        paymentInfo += `\n[Sent Via: ${paymentPlatform}]\n[Transaction ID: ${transactionId}]`;
+      }
+      paymentInfo += `\n[Delivery Charge: Rs. ${deliveryCharge}]`;
+
+      const fullAddress = `${formData.house_address}, ${formData.area}\n${formData.city}, ${formData.province} ${formData.zipcode}\n${formData.country}\n\n${paymentInfo}`;
 
       const { data, error: rpcError } = await supabase.rpc("process_checkout", {
         p_customer_name: formData.customer_name,
         p_customer_phone: formData.customer_phone,
         p_customer_address: fullAddress,
-        p_total_amount: totalAmount,
+        p_total_amount: finalTotal,
         p_cart_items: items.map((i) => ({
           product_id: i.product_id,
           quantity: i.quantity,
@@ -113,21 +195,125 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
                   id="customer_phone" 
                   required 
                   value={formData.customer_phone}
-                  onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, customer_phone: e.target.value });
+                    if (phoneError) setPhoneError(null);
+                  }}
                   placeholder="0300 1234567"
+                  className={phoneError ? "border-destructive ring-1 ring-destructive" : ""}
                 />
+                {phoneError && <p className="text-xs text-destructive mt-1 font-medium">{phoneError}</p>}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="customer_address">Complete Delivery Address</Label>
-                <textarea 
-                  id="customer_address" 
-                  required 
-                  rows={4}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  value={formData.customer_address}
-                  onChange={(e) => setFormData({ ...formData, customer_address: e.target.value })}
-                  placeholder="House 123, Street 4, Sector ABC, City"
-                />
+
+              <div className="pt-4 border-t border-border/50">
+                <Label className="text-base font-semibold mb-4 block">
+                  Delivery Address <span className="text-destructive">*</span>
+                </Label>
+                
+                {!isLocationTracked ? (
+                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary/20 rounded-xl bg-muted/10 gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                      <MapPin className="h-6 w-6 text-primary" />
+                    </div>
+                    <p className="text-sm text-center text-muted-foreground max-w-sm">
+                      For accurate delivery, please allow us to track your exact location first.
+                    </p>
+                    <Button 
+                      type="button" 
+                      onClick={handleGetLocation}
+                      disabled={isLocating}
+                      className="gap-2 w-full max-w-xs shadow-md"
+                    >
+                      {isLocating ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+                      {isLocating ? "Locating..." : "Track My Location"}
+                    </Button>
+                    <button 
+                      type="button"
+                      onClick={() => setIsLocationTracked(true)}
+                      className="text-xs text-muted-foreground hover:text-primary underline underline-offset-4 mt-2 transition-colors"
+                    >
+                      Or enter address manually
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-end mb-4">
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleGetLocation}
+                        disabled={isLocating}
+                        className="gap-2 h-8 text-xs text-primary hover:bg-primary/10"
+                      >
+                        {isLocating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MapPin className="h-3.5 w-3.5" />}
+                        {isLocating ? "Locating..." : "Re-track Location"}
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="house_address">House / Building Address</Label>
+                        <Input 
+                          id="house_address" 
+                          required 
+                          value={formData.house_address}
+                          onChange={(e) => setFormData({ ...formData, house_address: e.target.value })}
+                          placeholder="House 123, Street 4"
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="area">Area / Sector / Society</Label>
+                        <Input 
+                          id="area" 
+                          required 
+                          value={formData.area}
+                          onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                          placeholder="Sector ABC"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="city">City</Label>
+                        <Input 
+                          id="city" 
+                          required 
+                          value={formData.city}
+                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          placeholder="Karachi"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="province">Province / State</Label>
+                        <Input 
+                          id="province" 
+                          required 
+                          value={formData.province}
+                          onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                          placeholder="Sindh"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="country">Country</Label>
+                        <Input 
+                          id="country" 
+                          required 
+                          value={formData.country}
+                          onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                          placeholder="Pakistan"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="zipcode">Zip / Postal Code</Label>
+                        <Input 
+                          id="zipcode" 
+                          required 
+                          value={formData.zipcode}
+                          onChange={(e) => setFormData({ ...formData, zipcode: e.target.value })}
+                          placeholder="75000"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -191,14 +377,94 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
             {formData.payment_method === 'ONLINE' && (
               <Card className="border-primary/20 shadow-sm bg-primary/5 mt-4">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-primary text-sm uppercase tracking-widest">Bank Transfer Instructions</CardTitle>
+                  <CardTitle className="text-primary text-sm uppercase tracking-widest">Payment Instructions</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed font-medium">
-                    {paymentDetails}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-4 italic">
-                    Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-background border rounded-lg shadow-sm">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Bank Transfer</p>
+                    <p className="text-sm font-medium">Bank Name: <span className="font-bold">ABL (Allied Bank Limited)</span></p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="font-mono text-lg font-semibold">01280010098143980019</p>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-muted-foreground hover:text-primary"
+                        onClick={() => handleCopy("01280010098143980019", "bank")}
+                      >
+                        {copiedId === "bank" ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-background border rounded-lg shadow-sm">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Easypaisa</p>
+                      <div className="flex items-center justify-between">
+                        <p className="font-mono text-base font-semibold">03353963793</p>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7 text-muted-foreground hover:text-primary"
+                          onClick={() => handleCopy("03353963793", "easypaisa")}
+                        >
+                          {copiedId === "easypaisa" ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-background border rounded-lg shadow-sm">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">SadaPay</p>
+                      <div className="flex items-center justify-between">
+                        <p className="font-mono text-base font-semibold">03342306222</p>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7 text-muted-foreground hover:text-primary"
+                          onClick={() => handleCopy("03342306222", "sadapay")}
+                        >
+                          {copiedId === "sadapay" ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 space-y-4">
+                    <div>
+                      <Label htmlFor="paymentPlatform" className="text-sm font-semibold mb-2 block">
+                        I sent the money via <span className="text-destructive">*</span>
+                      </Label>
+                      <select 
+                        id="paymentPlatform"
+                        required={formData.payment_method === 'ONLINE'}
+                        value={paymentPlatform}
+                        onChange={(e) => setPaymentPlatform(e.target.value)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="" disabled>Select platform...</option>
+                        <option value="ABL Bank Transfer">ABL Bank Transfer</option>
+                        <option value="Easypaisa">Easypaisa</option>
+                        <option value="SadaPay">SadaPay</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="transactionId" className="text-sm font-semibold mb-2 block">
+                        Transaction ID (TID) <span className="text-destructive">*</span>
+                      </Label>
+                      <Input 
+                        id="transactionId" 
+                        required={formData.payment_method === 'ONLINE'}
+                        value={transactionId}
+                        onChange={(e) => setTransactionId(e.target.value)}
+                        placeholder="Enter 11-14 digit TID here"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground mt-2 italic bg-background p-3 rounded-lg border border-dashed">
+                    Please transfer the exact amount and enter the <span className="font-bold text-foreground">Transaction ID</span> above. Your order will not be shipped until the funds have cleared in our account.
                   </p>
                 </CardContent>
               </Card>
@@ -213,7 +479,7 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
 
           <Button type="submit" size="lg" className="w-full text-base h-12" disabled={loading}>
             {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-            Confirm Order — Rs. {totalAmount}
+            Confirm Order — Rs. {finalTotal}
           </Button>
         </form>
       </div>
@@ -259,11 +525,11 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
             </div>
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Shipping</span>
-              <span>Calculated at next step</span>
+              <span>{deliveryCharge > 0 ? `Rs. ${deliveryCharge}` : "Calculated after entering city"}</span>
             </div>
             <div className="flex justify-between font-bold text-lg pt-2 border-t">
               <span>Total</span>
-              <span className="text-primary">Rs. {totalAmount}</span>
+              <span className="text-primary">Rs. {finalTotal}</span>
             </div>
           </div>
         </div>
