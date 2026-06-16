@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 import { WishlistButton } from "@/components/WishlistButton";
+import { useRouter } from "next/navigation";
 import type { StoreProduct } from "@/lib/product-types";
 
 export function QuickViewModal({
@@ -16,11 +17,18 @@ export function QuickViewModal({
   onClose: () => void;
 }) {
   const { addToCart } = useCart();
+  const router = useRouter();
 
   if (!product) return null;
 
   const imageUrl = product.image_urls?.[0] || "https://placehold.co/600x600/fbcfe8/831843?text=Reens";
   const isSoldOut = product.quantity === 0;
+
+  const hasVariants = 
+    Boolean(product.color_options) || 
+    Boolean(product.size_matrix) || 
+    Boolean(product.interactive_addons) || 
+    product.has_custom_measurement;
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
@@ -53,20 +61,25 @@ export function QuickViewModal({
             )}
             <div className="mt-auto flex flex-col gap-3 pt-4">
               <Button
-                disabled={isSoldOut}
+                disabled={isSoldOut && !hasVariants}
                 onClick={() => {
-                  addToCart({
-                    product_id: product.id,
-                    title: product.title,
-                    price: Number(product.price),
-                    brand: product.brand,
-                    quantity: 1,
-                    image_url: imageUrl,
-                  });
+                  if (hasVariants) {
+                    onClose();
+                    router.push(`/product/${product.id}`);
+                  } else {
+                    addToCart({
+                      product_id: product.id,
+                      title: product.title,
+                      price: Number(product.price),
+                      brand: product.brand,
+                      quantity: 1,
+                      image_url: imageUrl,
+                    });
+                  }
                 }}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                {isSoldOut ? "Out of Stock" : "Add to Cart"}
+                {isSoldOut ? "Out of Stock" : hasVariants ? "Select Options" : "Add to Cart"}
               </Button>
               <div className="flex gap-3">
                 <Link href={`/product/${product.id}`} className="flex-1" onClick={onClose}>

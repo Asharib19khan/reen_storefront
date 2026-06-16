@@ -210,14 +210,7 @@ export default async function ProductPage({
 
       {!isSoldOut && (
         <MobileStickyAddToCart
-          product={{
-            id: String(product.id),
-            title: product.title,
-            price: product.price,
-            brand: product.brand,
-            quantity: product.quantity,
-            image_urls: product.image_urls,
-          }}
+          product={product as StoreProduct}
         />
       )}
     </div>

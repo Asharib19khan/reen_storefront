@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 import { WishlistButton } from "@/components/WishlistButton";
+import { useRouter } from "next/navigation";
 import { QuickViewModal } from "@/components/QuickViewModal";
 import type { StoreProduct } from "@/lib/product-types";
 
@@ -17,9 +18,16 @@ interface ProductCardProps {
 
 export function ProductCard({ product, enableQuickView = true }: ProductCardProps) {
   const { addToCart } = useCart();
+  const router = useRouter();
   const [quickViewProduct, setQuickViewProduct] = useState<StoreProduct | null>(null);
   const isSoldOut = product.quantity === 0;
   const imageUrl = product.image_urls?.[0] || "https://placehold.co/600x600/fbcfe8/831843?text=Reens";
+
+  const hasVariants = 
+    Boolean(product.color_options) || 
+    Boolean(product.size_matrix) || 
+    Boolean(product.interactive_addons) || 
+    product.has_custom_measurement;
 
   return (
     <>
@@ -73,20 +81,24 @@ export function ProductCard({ product, enableQuickView = true }: ProductCardProp
             <div className="translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
               <Button
                 className="w-full h-10 sm:h-12 shadow-sm transition-all duration-300 hover:shadow-[0_8px_20px_rgba(212,165,180,0.3)] hover:scale-[1.03] rounded-full font-medium tracking-wide text-xs sm:text-sm"
-                disabled={isSoldOut}
+                disabled={isSoldOut && !hasVariants}
                 onClick={(e) => {
                   e.preventDefault();
-                  addToCart({
-                    product_id: product.id,
-                    title: product.title,
-                    price: product.price,
-                    brand: product.brand,
-                    quantity: 1,
-                    image_url: imageUrl,
-                  });
+                  if (hasVariants) {
+                    router.push(`/product/${product.id}`);
+                  } else {
+                    addToCart({
+                      product_id: product.id,
+                      title: product.title,
+                      price: product.price,
+                      brand: product.brand,
+                      quantity: 1,
+                      image_url: imageUrl,
+                    });
+                  }
                 }}
               >
-                {isSoldOut ? "Out of Stock" : "Add to Cart"}
+                {isSoldOut ? "Out of Stock" : hasVariants ? "Select Options" : "Add to Cart"}
               </Button>
             </div>
           </div>

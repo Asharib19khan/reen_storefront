@@ -5,17 +5,12 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 
+import type { StoreProduct } from "@/lib/product-types";
+
 export function MobileStickyAddToCart({
   product,
 }: {
-  product: {
-    id: string;
-    title: string;
-    price: number;
-    brand: string;
-    quantity: number;
-    image_urls: string[] | null;
-  };
+  product: StoreProduct;
 }) {
   const { addToCart, openCart } = useCart();
   const [visible, setVisible] = useState(false);
@@ -28,6 +23,12 @@ export function MobileStickyAddToCart({
   }, []);
 
   if (isSoldOut || !visible) return null;
+
+  const hasVariants = 
+    Boolean(product.color_options) || 
+    Boolean(product.size_matrix) || 
+    Boolean(product.interactive_addons) || 
+    product.has_custom_measurement;
 
   const imageUrl = product.image_urls?.[0] || "https://placehold.co/600x600/fbcfe8/831843?text=Reens";
 
@@ -42,19 +43,23 @@ export function MobileStickyAddToCart({
           size="lg"
           className="shrink-0 rounded-full px-6"
           onClick={() => {
-            addToCart({
-              product_id: String(product.id),
-              title: product.title,
-              price: Number(product.price),
-              brand: product.brand,
-              quantity: 1,
-              image_url: imageUrl,
-            });
-            openCart();
+            if (hasVariants) {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              addToCart({
+                product_id: String(product.id),
+                title: product.title,
+                price: Number(product.price),
+                brand: product.brand,
+                quantity: 1,
+                image_url: imageUrl,
+              });
+              openCart();
+            }
           }}
         >
           <ShoppingCart className="h-4 w-4 mr-2" />
-          Add to Cart
+          {hasVariants ? "Select Options" : "Add to Cart"}
         </Button>
       </div>
     </div>
