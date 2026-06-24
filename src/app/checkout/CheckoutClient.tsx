@@ -20,6 +20,11 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -41,9 +46,63 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
   const [transactionId, setTransactionId] = useState("");
   const [paymentPlatform, setPaymentPlatform] = useState("");
 
+  const handleApplyPromo = async () => {
+    if (!promoCodeInput.trim()) return;
+    setPromoLoading(true);
+    setPromoError(null);
+    
+    const supabase = getSupabase();
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from('promo_codes')
+      .select('*')
+      .eq('code', promoCodeInput.trim().toUpperCase())
+      .single();
+
+    setPromoLoading(false);
+
+    if (error || !data) {
+      setPromoError("Invalid promo code.");
+      return;
+    }
+
+    if (!data.is_active) {
+      setPromoError("This promo code is inactive.");
+      return;
+    }
+
+    if (data.max_uses && data.current_uses >= data.max_uses) {
+      setPromoError("This promo code has reached its usage limit.");
+      return;
+    }
+
+    if (totalAmount < data.min_order_value) {
+      setPromoError(`Minimum order value of Rs. ${data.min_order_value} required.`);
+      return;
+    }
+
+    if (data.valid_until && new Date() > new Date(data.valid_until)) {
+      setPromoError("This promo code has expired.");
+      return;
+    }
+
+    setAppliedPromo(data);
+    setPromoCodeInput("");
+  };
+
   const isKarachi = formData.city?.toLowerCase().includes('karachi');
   const deliveryCharge = formData.city.trim() ? (isKarachi ? 300 : 400) : 0;
-  const finalTotal = totalAmount + deliveryCharge;
+  
+  let discountAmount = 0;
+  if (appliedPromo) {
+    if (appliedPromo.discount_type === 'percentage') {
+      discountAmount = Math.floor(totalAmount * (appliedPromo.discount_value / 100));
+    } else {
+      discountAmount = appliedPromo.discount_value;
+    }
+  }
+
+  const finalTotal = Math.max(0, totalAmount + deliveryCharge - discountAmount);
 
   if (items.length === 0 && !orderId) {
     return (
@@ -141,7 +200,12 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
       }
       paymentInfo += `\n[Delivery Charge: Rs. ${deliveryCharge}]`;
 
-      const fullAddress = `${formData.house_address}, ${formData.area}\n${formData.city}, ${formData.province} ${formData.zipcode}\n${formData.country}\n\n${paymentInfo}`;
+      let promoInfo = "";
+      if (appliedPromo) {
+        promoInfo = `\n[Promo Applied: ${appliedPromo.code} (-Rs. ${discountAmount})]`;
+      }
+
+      const fullAddress = `${formData.house_address}, ${formData.area}\n${formData.city}, ${formData.province} ${formData.zipcode}\n${formData.country}\n\n${paymentInfo}${promoInfo}`;
 
       const { data, error: rpcError } = await supabase.rpc("process_checkout", {
         p_customer_name: formData.customer_name,
@@ -160,6 +224,10 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
       });
 
       if (rpcError) throw rpcError;
+
+      if (data && appliedPromo) {
+        await supabase.from('promo_codes').update({ current_uses: appliedPromo.current_uses + 1 }).eq('id', appliedPromo.id);
+      }
 
       setOrderId(data);
       clearCart();
@@ -523,6 +591,12 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
               <span>Subtotal</span>
               <span>Rs. {totalAmount}</span>
             </div>
+            {appliedPromo && (
+              <div className="flex justify-between text-sm text-green-600 font-medium">
+                <span>Discount ({appliedPromo.code})</span>
+                <span>-Rs. {discountAmount}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Shipping</span>
               <span>{deliveryCharge > 0 ? `Rs. ${deliveryCharge}` : "Calculated after entering city"}</span>
@@ -531,6 +605,34 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
               <span>Total</span>
               <span className="text-primary">Rs. {finalTotal}</span>
             </div>
+          </div>
+
+          <div className="mt-6 pt-6 border-t">
+            <Label className="text-sm mb-2 block">Promo Code</Label>
+            {!appliedPromo ? (
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="Enter code" 
+                  value={promoCodeInput}
+                  onChange={(e) => { setPromoCodeInput(e.target.value); setPromoError(null); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleApplyPromo();
+                    }
+                  }}
+                />
+                <Button type="button" variant="secondary" onClick={handleApplyPromo} disabled={promoLoading || !promoCodeInput.trim()}>
+                  {promoLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 text-green-600 px-3 py-2 rounded-md text-sm font-medium">
+                <span>{appliedPromo.code} applied!</span>
+                <button type="button" onClick={() => setAppliedPromo(null)} className="text-green-600 hover:text-green-800 underline">Remove</button>
+              </div>
+            )}
+            {promoError && <p className="text-xs text-destructive mt-2">{promoError}</p>}
           </div>
         </div>
       </div>

@@ -9,6 +9,10 @@ export function filterProducts(
     category?: string;
     inStockOnly?: boolean;
     newArrivalsOnly?: boolean;
+    sizes?: string[];
+    colors?: string[];
+    minPrice?: number;
+    maxPrice?: number;
   }
 ): StoreProduct[] {
   let result = [...products];
@@ -33,6 +37,30 @@ export function filterProducts(
 
   if (opts.inStockOnly) {
     result = result.filter((p) => p.quantity > 0);
+  }
+
+  if (opts.minPrice !== undefined && opts.minPrice >= 0) {
+    result = result.filter((p) => Number(p.price) >= opts.minPrice!);
+  }
+
+  if (opts.maxPrice !== undefined && opts.maxPrice > 0) {
+    result = result.filter((p) => Number(p.price) <= opts.maxPrice!);
+  }
+
+  if (opts.sizes && opts.sizes.length > 0) {
+    result = result.filter((p) => {
+      if (!p.size_matrix) return false;
+      const productSizes = p.size_matrix.split(',').map(s => s.trim().toUpperCase());
+      return opts.sizes!.some(s => productSizes.includes(s.toUpperCase()));
+    });
+  }
+
+  if (opts.colors && opts.colors.length > 0) {
+    result = result.filter((p) => {
+      if (!p.color_options) return false;
+      const productColors = p.color_options.split(',').map(c => c.trim().toLowerCase());
+      return opts.colors!.some(c => productColors.includes(c.toLowerCase()));
+    });
   }
 
   return result;

@@ -43,6 +43,10 @@ export default async function ShopPage({
     stock?: string;
     filter?: string;
     q?: string;
+    sizes?: string;
+    colors?: string;
+    min_price?: string;
+    max_price?: string;
   }>;
 }) {
   const resolvedParams = await searchParams;
@@ -52,6 +56,10 @@ export default async function ShopPage({
   const inStockOnly = resolvedParams.stock === "in";
   const newArrivalsOnly = resolvedParams.filter === "new";
   const searchQuery = resolvedParams.q;
+  const sizes = resolvedParams.sizes ? resolvedParams.sizes.split(",") : [];
+  const colors = resolvedParams.colors ? resolvedParams.colors.split(",") : [];
+  const minPrice = resolvedParams.min_price ? Number(resolvedParams.min_price) : undefined;
+  const maxPrice = resolvedParams.max_price ? Number(resolvedParams.max_price) : undefined;
 
   const { hideByreenXo, hideLuxereenWears } = await getStorefrontSettings();
 
@@ -98,6 +106,10 @@ export default async function ShopPage({
     category: categoryFilter,
     inStockOnly,
     newArrivalsOnly,
+    sizes,
+    colors,
+    minPrice,
+    maxPrice
   });
   products = sortProducts(products, sort);
 
