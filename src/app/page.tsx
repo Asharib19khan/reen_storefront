@@ -45,9 +45,9 @@ export default async function Home() {
 
       {/* Best Selling Section */}
       {bestSelling && bestSelling.length > 0 && (
-        <section id="best-selling" className="py-24 md:py-32 bg-background w-full">
+        <section id="best-selling" className="py-12 md:py-16 bg-background w-full">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row justify-between md:items-end mb-16 border-b border-border/30 pb-6 gap-6">
+            <div className="flex flex-col md:flex-row justify-between md:items-end mb-8 border-b border-border/30 pb-6 gap-6">
               <div>
                 <h2 className="text-4xl md:text-5xl font-serif text-foreground tracking-tight">Best Selling</h2>
                 <p className="text-muted-foreground mt-3 font-sans uppercase tracking-widest text-xs">Our most loved signature pieces.</p>
@@ -68,9 +68,9 @@ export default async function Home() {
       )}
 
       {!hideByreenXo && byreenFeatured && byreenFeatured.length > 0 && (
-        <section id="byreen-xo-featured" className="py-24 md:py-32 bg-muted/30 w-full border-y border-border/30">
+        <section id="byreen-xo-featured" className="py-12 md:py-16 bg-muted/30 w-full border-y border-border/30">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-8">
               <div>
                 <h2 className="text-5xl md:text-6xl font-serif text-foreground">byreen.xo</h2>
                 <p className="text-muted-foreground mt-4 max-w-xl text-lg leading-relaxed">
@@ -98,9 +98,9 @@ export default async function Home() {
       )}
 
       {!hideLuxereenWears && luxereenFeatured && luxereenFeatured.length > 0 && (
-        <section id="luxereen-wears-featured" className="py-24 md:py-32 bg-background w-full">
+        <section id="luxereen-wears-featured" className="py-12 md:py-16 bg-background w-full">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-8">
               <div>
                 <h2 className="text-5xl md:text-6xl font-serif text-foreground">luxereen.wears</h2>
                 <p className="text-muted-foreground mt-4 max-w-xl text-lg leading-relaxed">
@@ -129,9 +129,9 @@ export default async function Home() {
 
       {/* New Arrivals Section */}
       {newArrivals && newArrivals.length > 0 && (
-        <section id="new-arrival" className="py-24 md:py-32 bg-muted/10 w-full border-t border-border/30">
+        <section id="new-arrival" className="py-12 md:py-16 bg-muted/10 w-full border-t border-border/30">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="text-center mb-16">
+            <div className="text-center mb-8">
               <h2 className="text-4xl md:text-5xl font-serif tracking-tight text-foreground">New Arrivals</h2>
               <p className="text-muted-foreground mt-3 font-sans uppercase tracking-widest text-xs">Fresh drops for the season.</p>
               <div className="w-12 h-[2px] bg-primary mx-auto mt-8"></div>
@@ -151,9 +151,9 @@ export default async function Home() {
 
       {/* Customer Reviews */}
       {reviews && reviews.length > 0 && (
-        <section id="reviews" className="py-28 md:py-40 bg-[#1A1517] text-white w-full">
+        <section id="reviews" className="py-16 md:py-24 bg-[#1A1517] text-white w-full">
           <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-            <h2 className="text-4xl md:text-6xl font-serif mb-20 text-white/90">Loved by our clients</h2>
+            <h2 className="text-4xl md:text-6xl font-serif mb-12 text-white/90">Loved by our clients</h2>
             <div className="grid md:grid-cols-3 gap-10">
               {reviews.map((review) => (
                 <div key={review.id} className="flex flex-col items-center space-y-4">

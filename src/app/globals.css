@@ -38,26 +38,26 @@
 
 @layer base {
   :root {
-    --background: #FFFDFD; /* Very subtle pink/white */
-    --foreground: #2A1B22; /* Soft deep taupe/rose-black */
+    --background: #FFFFFF; /* Pure white */
+    --foreground: #000000; /* Pure black text */
     --card: #FFFFFF;
-    --card-foreground: #2A1B22;
+    --card-foreground: #000000;
     --popover: #FFFFFF;
-    --popover-foreground: #2A1B22;
-    --primary: #D4A5B4; /* Soft dusty rose / blush */
+    --popover-foreground: #000000;
+    --primary: #000000; /* Sharp black buttons */
     --primary-foreground: #FFFFFF;
-    --secondary: #F8F2F4; /* Ultra light blush for pills */
-    --secondary-foreground: #8B6E7B;
-    --muted: #F8F2F4;
-    --muted-foreground: #A8959D;
-    --accent: #FDF9FA;
-    --accent-foreground: #8B6E7B;
-    --destructive: #E07A5F; /* Soft terracotta red */
+    --secondary: #F5F5F5; /* Very subtle light grey */
+    --secondary-foreground: #000000;
+    --muted: #F5F5F5;
+    --muted-foreground: #737373; /* Neutral gray */
+    --accent: #FAFAFA;
+    --accent-foreground: #000000;
+    --destructive: #990000; /* Deep red */
     --destructive-foreground: #FFFFFF;
-    --border: #F0E6EA;
-    --input: #F0E6EA;
-    --ring: #D4A5B4;
-    --radius: 1.5rem; /* Bubbly, large radius for Pinterest look */
+    --border: #E5E5E5; /* Crisp thin grey border */
+    --input: #E5E5E5;
+    --ring: #000000;
+    --radius: 0rem; /* Razor sharp edges for luxury editorial feel */
   }
 }
 
@@ -74,20 +74,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    @apply bg-background text-foreground antialiased selection:bg-black selection:text-white;
   }
 
   .scrollbar-hide {

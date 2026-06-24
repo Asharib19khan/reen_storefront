@@ -15,6 +15,16 @@ export type StoreProduct = {
   size_matrix?: string | null;
   interactive_addons?: string | null;
   has_custom_measurement?: boolean;
+  variants?: ProductVariant[];
+};
+
+export type ProductVariant = {
+  id: string;
+  product_id: string;
+  color: string | null;
+  size: string | null;
+  quantity: number;
+  sku: string | null;
 };
 
 export type ShopChip = {

@@ -20,7 +20,6 @@ export async function SiteFooter() {
     ],
     policies: [
       { label: "Shipping", href: "/contact#shipping" },
-      { label: "Returns & Exchanges", href: "/contact#returns" },
     ],
   };
 
@@ -89,8 +88,19 @@ export async function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-border/50 text-center text-sm font-medium text-muted-foreground/80">
-          © {new Date().getFullYear()} Reens · byreen.xo & luxereen.wears. All rights reserved.
+        <div className="mt-16 pt-8 border-t border-border/50 flex flex-col items-center justify-center gap-2 text-sm font-medium text-muted-foreground/80">
+          <p>© {new Date().getFullYear()} Reens · byreen.xo & luxereen.wears. All rights reserved.</p>
+          <p>
+            Powered by{" "}
+            <a 
+              href="https://yeezus-yzs.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="font-bold text-foreground hover:text-primary transition-colors hover:underline"
+            >
+              YEEZUS
+            </a>
+          </p>
         </div>
       </div>
     </footer>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Cormorant_Garamond } from "next/font/google";
+import { Montserrat, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
@@ -9,7 +9,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { getStorefrontSettings } from "@/lib/settings";
 import { StorefrontSettingsProvider } from "@/lib/settings-context";
 
-const outfit = Outfit({
+const montserrat = Montserrat({
   variable: "--font-sans",
   subsets: ["latin"],
 });
@@ -33,7 +33,7 @@ export default async function RootLayout({
   const settings = await getStorefrontSettings();
 
   return (
-    <html lang="en" className={`${outfit.variable} ${cormorant.variable} h-full antialiased`}>
+    <html lang="en" className={`${montserrat.variable} ${cormorant.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
         <StorefrontSettingsProvider settings={settings}>
           <WishlistProvider>

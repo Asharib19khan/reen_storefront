@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles, ShoppingBag, Code2 } from "lucide-react";
+import { ArrowUpRight, ShoppingBag, Code2, MessageCircle, Mail } from "lucide-react";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/icons/social-icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -149,38 +149,72 @@ export default function ContactPage() {
       </section>
 
       <section className="max-w-5xl mx-auto px-4 py-16 md:py-24 w-full">
-        <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden mb-10">
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <Code2 className="h-7 w-7 text-primary" />
+        <Card className="relative overflow-hidden border-[#333] bg-[#0a0a0a] text-white shadow-2xl mb-10 group">
+          {/* Subtle animated gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          
+          <CardHeader className="relative text-center pb-4 pt-10">
+            <div className="mx-auto mb-6 h-12 w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
+              <Code2 className="h-5 w-5 text-white/80" />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/50 mb-3">
               Crafted for Reens
             </p>
-            <CardTitle className="text-2xl md:text-3xl font-serif mt-2">
+            <CardTitle className="text-3xl md:text-4xl font-sans font-semibold tracking-tight text-white mt-2">
               {siteCredits.headline}
             </CardTitle>
-            <CardDescription className="text-base mt-3 leading-relaxed max-w-2xl mx-auto">
+            <CardDescription className="text-base mt-4 leading-relaxed max-w-2xl mx-auto text-white/60">
               {siteCredits.bio}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex justify-center pb-8">
+          <CardContent className="relative flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 pb-10">
             <a
               href={studio.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 rounded-full border border-primary/30 bg-primary/5 px-6 py-3 hover:bg-primary/10 transition-colors"
+              className="inline-flex w-full sm:w-auto items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group/btn"
             >
-              <Sparkles className="h-5 w-5 text-primary" />
               <span className="text-left">
-                <span className="block text-xs uppercase tracking-widest text-muted-foreground">
+                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
                   {studio.name}
                 </span>
-                <span className="block font-medium text-foreground">
-                  {studio.instagramHandle} · Studio Instagram
+                <span className="block text-sm font-medium text-white/90">
+                  @yeezus_yzs · Instagram
                 </span>
               </span>
-              <ArrowUpRight className="h-4 w-4 text-primary" />
+              <ArrowUpRight className="h-4 w-4 text-white/50 group-hover/btn:text-white transition-colors" />
+            </a>
+
+            <a
+              href="https://wa.me/923130028473"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full sm:w-auto items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group/btn"
+            >
+              <MessageCircle className="h-5 w-5 text-white/70 group-hover/btn:text-white transition-colors" />
+              <span className="text-left">
+                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+                  Chat with us
+                </span>
+                <span className="block text-sm font-medium text-white/90">
+                  WhatsApp
+                </span>
+              </span>
+            </a>
+
+            <a
+              href="mailto:yeezus196@gmail.com"
+              className="inline-flex w-full sm:w-auto items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group/btn"
+            >
+              <Mail className="h-5 w-5 text-white/70 group-hover/btn:text-white transition-colors" />
+              <span className="text-left">
+                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+                  Email us
+                </span>
+                <span className="block text-sm font-medium text-white/90">
+                  yeezus196@gmail.com
+                </span>
+              </span>
             </a>
           </CardContent>
         </Card>
@@ -218,12 +252,6 @@ export default function ContactPage() {
         <h3 className="text-lg font-semibold mb-2">Shipping</h3>
         <p className="text-sm text-muted-foreground">
           Nationwide delivery across Pakistan in 3–5 business days. Shipping cost is confirmed at checkout.
-        </p>
-      </section>
-      <section id="returns" className="max-w-3xl mx-auto px-4 pb-16 scroll-mt-28">
-        <h3 className="text-lg font-semibold mb-2">Returns & Exchanges</h3>
-        <p className="text-sm text-muted-foreground">
-          Custom-measured items are non-refundable. Standard sizes may be exchanged within 7 days with tags attached.
         </p>
       </section>
     </div>
