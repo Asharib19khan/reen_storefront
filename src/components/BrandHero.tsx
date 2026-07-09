@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import anime from "animejs";
+import Image from "next/image";
 
 interface Banner {
   id: string;
@@ -29,8 +30,7 @@ export function BrandHero({ desktopBanner, mobileBanner, title }: { desktopBanne
           {desktopBanner.media_type === 'video' ? (
             <video src={desktopBanner.media_url} autoPlay muted loop playsInline className="w-full h-auto max-h-[80vh] object-cover transition-opacity duration-1000" />
           ) : (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={desktopBanner.media_url} alt={desktopBanner.title} className="w-full h-auto object-contain transition-opacity duration-1000" />
+            <Image src={desktopBanner.media_url} alt={desktopBanner.title} width={1920} height={1080} className="w-full h-auto object-contain transition-opacity duration-1000" priority />
           )}
         </div>
       )}
@@ -41,8 +41,7 @@ export function BrandHero({ desktopBanner, mobileBanner, title }: { desktopBanne
           {mobileBanner.media_type === 'video' ? (
             <video src={mobileBanner.media_url} autoPlay muted loop playsInline className="w-full h-auto object-cover transition-opacity duration-1000" />
           ) : (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={mobileBanner.media_url} alt={mobileBanner.title} className="w-full h-auto object-contain transition-opacity duration-1000" />
+            <Image src={mobileBanner.media_url} alt={mobileBanner.title} width={1080} height={1920} className="w-full h-auto object-contain transition-opacity duration-1000" priority />
           )}
         </div>
       )}

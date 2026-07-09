@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export function ImageGallery({ images, title }: { images: string[], title: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -11,11 +12,12 @@ export function ImageGallery({ images, title }: { images: string[], title: strin
   return (
     <div className="flex flex-col gap-4">
       <div className="aspect-square relative overflow-hidden rounded-2xl bg-muted border shadow-sm">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
+        <Image 
           src={displayImages[currentIndex]} 
           alt={title}
-          className="object-cover w-full h-full"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
         />
       </div>
       {displayImages.length > 1 && (
@@ -29,8 +31,7 @@ export function ImageGallery({ images, title }: { images: string[], title: strin
                 currentIndex === idx ? "border-primary" : "border-transparent hover:border-primary/50"
               )}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img} alt={`${title} ${idx}`} className="object-cover w-full h-full" />
+              <Image src={img} alt={`${title} ${idx}`} fill sizes="25vw" className="object-cover" />
             </button>
           ))}
         </div>

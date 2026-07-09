@@ -10,6 +10,7 @@ import { WishlistButton } from "@/components/WishlistButton";
 import { useRouter } from "next/navigation";
 import { QuickViewModal } from "@/components/QuickViewModal";
 import type { StoreProduct } from "@/lib/product-types";
+import Image from "next/image";
 
 interface ProductCardProps {
   product: StoreProduct;
@@ -34,17 +35,23 @@ export function ProductCard({ product, enableQuickView = true }: ProductCardProp
       <div className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-card/60 backdrop-blur-md border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-[600ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-[0_20px_40px_rgba(212,165,180,0.15)] hover:-translate-y-3 hover:border-primary/20 h-full">
         <Link href={`/product/${product.id}`} className="relative aspect-square overflow-hidden bg-muted/40 block">
           {/* Main Image */}
-          <img
+          <Image
             src={imageUrl}
             alt={product.title}
-            className={`object-cover w-full h-full transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${product.image_urls && product.image_urls.length > 1 ? 'group-hover:opacity-0 scale-100' : 'group-hover:scale-110'}`}
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            quality={90}
+            className={`object-cover transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${product.image_urls && product.image_urls.length > 1 ? 'group-hover:opacity-0 scale-100' : 'group-hover:scale-110'}`}
           />
           {/* Secondary Image for Hover Swap */}
           {product.image_urls && product.image_urls.length > 1 && (
-            <img
+            <Image
               src={product.image_urls[1]}
               alt={`${product.title} alternate view`}
-              className="absolute inset-0 object-cover w-full h-full transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] opacity-0 group-hover:opacity-100 group-hover:scale-110"
+              fill
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              quality={90}
+              className="absolute inset-0 object-cover transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] opacity-0 group-hover:opacity-100 group-hover:scale-110"
             />
           )}
           <div className="absolute top-3 left-3 flex flex-col gap-2">

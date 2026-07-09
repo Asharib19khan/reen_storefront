@@ -3,6 +3,7 @@
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
+import Image from "next/image";
 import "./LuxereenCarousel.css";
 
 type Product = {
@@ -295,13 +296,12 @@ const CarouselInstance = memo(function CarouselInstance({
             >
               <Link
                 href={productHref}
-                className="carousel__image-link"
+                className="carousel__image-link relative"
                 aria-label={`View ${product.title}`}
                 onClick={handleImageClick}
               >
                 {imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={imageUrl} alt={product.title} />
+                  <Image src={imageUrl} alt={product.title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover" />
                 ) : (
                   <div className="carousel__image-placeholder" aria-hidden="true" />
                 )}

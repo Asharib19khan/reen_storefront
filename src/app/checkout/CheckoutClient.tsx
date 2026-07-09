@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { CheckCircle2, Loader2, CreditCard, Banknote, MapPin, Copy, Check } from "lucide-react";
+import Image from "next/image";
 
 export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
   const { items, totalAmount, clearCart } = useCart();
@@ -559,8 +560,7 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
             {items.map((item) => (
               <div key={item.cart_item_id} className="flex gap-4">
                 <div className="w-20 h-20 rounded-md bg-muted overflow-hidden shrink-0 border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                  <Image src={item.image_url} alt={item.title} fill sizes="80px" className="object-cover" />
                 </div>
                 <div className="flex-1 text-sm">
                   <div className="flex items-center gap-2 mb-1">

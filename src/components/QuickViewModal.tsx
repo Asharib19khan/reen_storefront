@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart-context";
 import { WishlistButton } from "@/components/WishlistButton";
 import { useRouter } from "next/navigation";
 import type { StoreProduct } from "@/lib/product-types";
+import Image from "next/image";
 
 export function QuickViewModal({
   product,
@@ -43,9 +44,8 @@ export function QuickViewModal({
         </button>
 
         <div className="grid md:grid-cols-2 gap-0">
-          <div className="aspect-square md:aspect-auto bg-muted">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageUrl} alt={product.title} className="w-full h-full object-cover" />
+          <div className="relative aspect-square md:min-h-[400px] bg-muted">
+            <Image src={imageUrl} alt={product.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
           </div>
           <div className="p-6 md:p-8 flex flex-col">
             <Badge variant="secondary" className="w-fit mb-3 text-[10px] uppercase tracking-widest">
