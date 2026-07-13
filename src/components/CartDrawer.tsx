@@ -49,7 +49,7 @@ export function CartDrawer() {
                 <div className="flex flex-col items-center justify-center h-full text-center py-12">
                   <ShoppingBag className="h-12 w-12 text-muted-foreground/40 mb-4" />
                   <p className="text-muted-foreground mb-6">Your cart is empty.</p>
-                  <Link href="/shop" onClick={closeCart}>
+                  <Link href="/" onClick={closeCart}>
                     <Button>Continue Shopping</Button>
                   </Link>
                 </div>

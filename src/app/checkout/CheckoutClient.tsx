@@ -109,7 +109,7 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
     return (
       <div className="text-center py-20">
         <p className="text-muted-foreground mb-4">Your cart is empty.</p>
-        <Link href="/shop">
+        <Link href="/">
           <Button>Return to Shop</Button>
         </Link>
       </div>
