@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import type { StoreProduct } from "@/lib/product-types";
+import { buildCartPayload } from "@/lib/shop-utils";
 import "./ByreenHoverCard.css";
 
 export function ByreenHoverCard({ product }: { product: StoreProduct }) {
@@ -20,14 +21,7 @@ export function ByreenHoverCard({ product }: { product: StoreProduct }) {
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isSoldOut) return;
-    addToCart({
-      product_id: product.id,
-      title: product.title,
-      price: product.price,
-      brand: product.brand,
-      quantity: 1,
-      image_url: imageUrl,
-    });
+    addToCart(buildCartPayload(product));
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1500);
   };

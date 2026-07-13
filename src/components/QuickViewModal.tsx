@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart-context";
 import { WishlistButton } from "@/components/WishlistButton";
 import { useRouter } from "next/navigation";
 import type { StoreProduct } from "@/lib/product-types";
+import { buildCartPayload } from "@/lib/shop-utils";
 import Image from "next/image";
 
 export function QuickViewModal({
@@ -45,7 +46,7 @@ export function QuickViewModal({
 
         <div className="grid md:grid-cols-2 gap-0">
           <div className="relative aspect-square md:min-h-[400px] bg-muted">
-            <Image src={imageUrl} alt={product.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            <Image unoptimized src={imageUrl} alt={product.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
           </div>
           <div className="p-6 md:p-8 flex flex-col">
             <Badge variant="secondary" className="w-fit mb-3 text-[10px] uppercase tracking-widest">
@@ -67,14 +68,7 @@ export function QuickViewModal({
                     onClose();
                     router.push(`/product/${product.id}`);
                   } else {
-                    addToCart({
-                      product_id: product.id,
-                      title: product.title,
-                      price: Number(product.price),
-                      brand: product.brand,
-                      quantity: 1,
-                      image_url: imageUrl,
-                    });
+                    addToCart(buildCartPayload(product));
                   }
                 }}
               >

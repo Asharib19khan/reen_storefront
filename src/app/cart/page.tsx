@@ -19,7 +19,7 @@ export default function CartPage() {
         <p className="text-muted-foreground mb-8 text-center max-w-md">
           Looks like you haven&apos;t added anything to your cart yet. Let&apos;s get you some beautiful items!
         </p>
-        <Link href="/shop">
+        <Link href="/">
           <Button size="lg" className="rounded-full px-8">Continue Shopping</Button>
         </Link>
       </div>

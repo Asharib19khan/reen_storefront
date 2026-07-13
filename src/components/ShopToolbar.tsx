@@ -91,8 +91,8 @@ export function ShopToolbar({
           onChange={(e) => updateParam("sort", e.target.value)}
           className={
             isByreen
-              ? "h-9 rounded-full border border-[#fbcfe8] bg-[#fffafb] px-4 text-sm text-[#831843]"
-              : "h-9 rounded-md border border-input bg-background px-3 text-sm"
+              ? "h-9 rounded-full border border-[#fbcfe8] bg-[#fffafb] px-4 text-sm text-[#831843] w-full sm:w-auto"
+              : "h-9 rounded-md border border-input bg-background px-3 text-sm w-full sm:w-auto"
           }
           aria-label="Sort products"
         >
@@ -108,8 +108,8 @@ export function ShopToolbar({
             onChange={(e) => updateParam("category", e.target.value)}
             className={
               isByreen
-                ? "h-9 rounded-full border border-[#fbcfe8] bg-[#fffafb] px-4 text-sm max-w-[200px] text-[#831843]"
-                : "h-9 rounded-md border border-input bg-background px-3 text-sm max-w-[200px]"
+                ? "h-9 rounded-full border border-[#fbcfe8] bg-[#fffafb] px-4 text-sm sm:max-w-[200px] text-[#831843] w-full sm:w-auto"
+                : "h-9 rounded-md border border-input bg-background px-3 text-sm sm:max-w-[200px] w-full sm:w-auto"
             }
             aria-label="Filter by category"
           >
@@ -125,8 +125,8 @@ export function ShopToolbar({
         <label
           className={
             isByreen
-              ? "inline-flex items-center gap-2 h-9 px-4 rounded-full border border-[#fbcfe8] bg-[#fffafb] text-sm text-[#831843] cursor-pointer"
-              : "inline-flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-background text-sm cursor-pointer"
+              ? "inline-flex items-center gap-2 h-9 px-4 rounded-full border border-[#fbcfe8] bg-[#fffafb] text-sm text-[#831843] cursor-pointer w-full sm:w-auto"
+              : "inline-flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-background text-sm cursor-pointer w-full sm:w-auto"
           }
         >
           <input
@@ -142,8 +142,8 @@ export function ShopToolbar({
           onClick={() => setShowAdvanced(!showAdvanced)}
           className={
             isByreen
-              ? "inline-flex items-center gap-2 h-9 px-4 rounded-full border border-[#fbcfe8] bg-[#fffafb] text-sm text-[#831843] transition-colors hover:bg-[#fbcfe8]/20"
-              : "inline-flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-background text-sm transition-colors hover:bg-accent"
+              ? "inline-flex items-center justify-center gap-2 h-9 px-4 rounded-full border border-[#fbcfe8] bg-[#fffafb] text-sm text-[#831843] transition-colors hover:bg-[#fbcfe8]/20 w-full sm:w-auto"
+              : "inline-flex items-center justify-center gap-2 h-9 px-3 rounded-md border border-input bg-background text-sm transition-colors hover:bg-accent w-full sm:w-auto"
           }
         >
           <Filter className="h-4 w-4" />

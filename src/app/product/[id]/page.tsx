@@ -9,8 +9,49 @@ import { ProductTrustBlock } from "@/components/ProductTrustBlock";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { MobileStickyAddToCart } from "@/components/MobileStickyAddToCart";
 import type { StoreProduct } from "@/lib/product-types";
+import type { Metadata, ResolvingMetadata } from "next";
 
 export const revalidate = 60;
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const resolvedParams = await params;
+  const supabase = getSupabase();
+  
+  if (!supabase) return { title: "Product" };
+
+  const { data: product } = await supabase
+    .from("products")
+    .select("title, description, image_urls, brand, hook_text")
+    .eq("id", resolvedParams.id)
+    .single();
+
+  if (!product) {
+    return { title: "Product Not Found" };
+  }
+
+  const title = `${product.title} | ${product.brand === "byreen_xo" ? "byreen.xo" : "luxereen.wears"}`;
+  const description = product.hook_text || product.description || `Shop ${product.title} online.`;
+  const ogImage = product.image_urls?.[0] || "";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: ogImage ? [{ url: ogImage }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImage ? [ogImage] : [],
+    }
+  };
+}
 
 export default async function ProductPage({
   params,
@@ -170,7 +211,9 @@ export default async function ProductPage({
                   />
                 </div>
               ) : (
-                <AddToCartButton product={product} />
+                <div id="variant-selector">
+                  <AddToCartButton product={product} />
+                </div>
               )}
             </div>
 

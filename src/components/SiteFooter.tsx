@@ -29,7 +29,7 @@ export async function SiteFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block mb-6">
-              <Image src="/logo.png" alt="Reens" width={140} height={140} className="h-16 w-auto object-contain transition-transform duration-300 hover:scale-105" />
+              <Image unoptimized src="/logo.png" alt="Reens" width={140} height={140} className="h-16 w-auto object-contain transition-transform duration-300 hover:scale-105" />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs font-medium">
               byreen.xo jewelry & luxereen.wears clothing — curated for the modern Pakistani woman.

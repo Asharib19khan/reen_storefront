@@ -227,7 +227,8 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
       if (rpcError) throw rpcError;
 
       if (data && appliedPromo) {
-        await supabase.from('promo_codes').update({ current_uses: appliedPromo.current_uses + 1 }).eq('id', appliedPromo.id);
+        const { error: promoError } = await supabase.rpc('increment_promo_usage', { p_promo_code: appliedPromo.code });
+        if (promoError) console.error("Failed to increment promo usage:", promoError);
       }
 
       setOrderId(data);
@@ -560,7 +561,7 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
             {items.map((item) => (
               <div key={item.cart_item_id} className="flex gap-4">
                 <div className="w-20 h-20 rounded-md bg-muted overflow-hidden shrink-0 border">
-                  <Image src={item.image_url} alt={item.title} fill sizes="80px" className="object-cover" />
+                  <Image unoptimized src={item.image_url} alt={item.title} fill sizes="80px" className="object-cover" />
                 </div>
                 <div className="flex-1 text-sm">
                   <div className="flex items-center gap-2 mb-1">

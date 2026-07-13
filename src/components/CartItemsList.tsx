@@ -25,7 +25,7 @@ export function CartItemsList({ compact = false }: { compact?: boolean }) {
           className={`flex gap-3 items-start ${compact ? "py-3 border-b border-border last:border-0" : "py-6 border-b border-border"}`}
         >
           <div className={`shrink-0 bg-muted rounded-md overflow-hidden border ${compact ? "w-16 h-16" : "w-24 h-24 md:w-32 md:h-32"}`}>
-            <Image src={item.image_url} alt={item.title} fill sizes="100px" className="object-cover" />
+            <Image unoptimized src={item.image_url} alt={item.title} fill sizes="100px" className="object-cover" />
           </div>
 
           <div className="flex-1 min-w-0">

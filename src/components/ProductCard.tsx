@@ -10,6 +10,7 @@ import { WishlistButton } from "@/components/WishlistButton";
 import { useRouter } from "next/navigation";
 import { QuickViewModal } from "@/components/QuickViewModal";
 import type { StoreProduct } from "@/lib/product-types";
+import { buildCartPayload } from "@/lib/shop-utils";
 import Image from "next/image";
 
 interface ProductCardProps {
@@ -35,7 +36,7 @@ export function ProductCard({ product, enableQuickView = true }: ProductCardProp
       <div className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-card/60 backdrop-blur-md border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-[600ms] ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-[0_20px_40px_rgba(212,165,180,0.15)] hover:-translate-y-3 hover:border-primary/20 h-full">
         <Link href={`/product/${product.id}`} className="relative aspect-square overflow-hidden bg-muted/40 block">
           {/* Main Image */}
-          <Image
+          <Image unoptimized
             src={imageUrl}
             alt={product.title}
             fill
@@ -45,7 +46,7 @@ export function ProductCard({ product, enableQuickView = true }: ProductCardProp
           />
           {/* Secondary Image for Hover Swap */}
           {product.image_urls && product.image_urls.length > 1 && (
-            <Image
+            <Image unoptimized
               src={product.image_urls[1]}
               alt={`${product.title} alternate view`}
               fill
@@ -72,7 +73,7 @@ export function ProductCard({ product, enableQuickView = true }: ProductCardProp
                   e.stopPropagation();
                   setQuickViewProduct(product);
                 }}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/50 bg-background/90 backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/50 bg-background/90 backdrop-blur-sm shadow-sm lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-500 hover:scale-110 hover:bg-primary hover:text-primary-foreground hover:border-primary"
                 aria-label="Quick view"
               >
                 <Eye className="h-4 w-4" />
@@ -84,7 +85,7 @@ export function ProductCard({ product, enableQuickView = true }: ProductCardProp
         <div className="flex flex-1 flex-col p-4 sm:p-6 z-10 bg-gradient-to-t from-card/80 to-transparent">
           <div className="flex flex-col sm:flex-row justify-between items-start mb-2 sm:mb-2 gap-1 sm:gap-2">
             <Link href={`/product/${product.id}`}>
-              <h3 className="font-serif font-medium text-base sm:text-lg md:text-xl line-clamp-2 sm:line-clamp-1 group-hover:text-primary transition-colors duration-500">
+              <h3 className="font-serif font-medium text-base sm:text-lg md:text-xl line-clamp-2 group-hover:text-primary transition-colors duration-500">
                 {product.title}
               </h3>
             </Link>
@@ -93,7 +94,7 @@ export function ProductCard({ product, enableQuickView = true }: ProductCardProp
           <p className="text-sm text-muted-foreground/80 mb-6 line-clamp-1">{product.category}</p>
 
           <div className="mt-auto overflow-hidden">
-            <div className="translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <div className="lg:translate-y-4 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
               <Button
                 className="w-full h-10 sm:h-12 shadow-sm transition-all duration-300 hover:shadow-[0_8px_20px_rgba(212,165,180,0.3)] hover:scale-[1.03] rounded-full font-medium tracking-wide text-xs sm:text-sm"
                 disabled={isSoldOut && !hasVariants}
@@ -102,14 +103,7 @@ export function ProductCard({ product, enableQuickView = true }: ProductCardProp
                   if (hasVariants) {
                     router.push(`/product/${product.id}`);
                   } else {
-                    addToCart({
-                      product_id: product.id,
-                      title: product.title,
-                      price: product.price,
-                      brand: product.brand,
-                      quantity: 1,
-                      image_url: imageUrl,
-                    });
+                    addToCart(buildCartPayload(product));
                   }
                 }}
               >

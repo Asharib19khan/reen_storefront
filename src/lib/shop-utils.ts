@@ -92,3 +92,23 @@ export function getUniqueCategories(products: StoreProduct[]): string[] {
   });
   return Array.from(set).sort();
 }
+
+export function buildCartPayload(product: StoreProduct | any) {
+  const defaultColor = product.color_options ? product.color_options.split(",")[0].trim() : "";
+  const defaultSize = product.size_matrix ? product.size_matrix.split(",")[0].trim() : "";
+  const defaultAddon = product.interactive_addons ? product.interactive_addons.split(",")[0].trim() : "";
+  const priceValue = Number(product.price) || 0;
+
+  return {
+    product_id: String(product.id),
+    title: product.title,
+    price: priceValue,
+    brand: product.brand || "luxereen_wears",
+    image_url: product.image_urls?.[0] || "https://placehold.co/600x600/fbcfe8/831843?text=Reens",
+    quantity: 1,
+    selected_color: defaultColor,
+    selected_size: defaultSize,
+    selected_addon: defaultAddon,
+    custom_measurement: "",
+  };
+}

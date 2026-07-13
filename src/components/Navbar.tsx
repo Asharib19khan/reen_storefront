@@ -116,7 +116,7 @@ export function Navbar() {
       <div className="max-w-[90rem] mx-auto flex min-h-20 md:min-h-24 items-center justify-between px-4 sm:px-6 lg:px-8 w-full py-2">
         <div className="flex gap-4 md:gap-8 lg:gap-10 items-center shrink-0 min-w-0">
           <Link href="/" className="flex items-center shrink-0">
-            <Image
+            <Image unoptimized
               src="/logo.png"
               alt="Reens Logo"
               width={250}

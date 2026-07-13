@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
-
 import type { StoreProduct } from "@/lib/product-types";
+import { buildCartPayload } from "@/lib/shop-utils";
 import Image from "next/image";
 
 export function MobileStickyAddToCart({
@@ -40,7 +40,7 @@ export function MobileStickyAddToCart({
       bg-background/95 backdrop-blur-xl`}
     >
       <div className="flex items-center gap-4">
-        <Image src={imageUrl} alt={product.title} width={64} height={64} className="hidden md:block object-cover bg-muted" />
+        <Image unoptimized src={imageUrl} alt={product.title} width={64} height={64} className="hidden md:block object-cover bg-muted" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium line-clamp-1">{product.title}</p>
           <p className="text-primary font-bold text-sm tracking-wide mt-1">Rs. {product.price}</p>
@@ -50,16 +50,14 @@ export function MobileStickyAddToCart({
           className="shrink-0 rounded-none px-6 font-semibold tracking-wider text-xs uppercase h-12"
           onClick={() => {
             if (hasVariants) {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              const variantSection = document.getElementById('variant-selector') || document.querySelector('.accordion-item');
+              if (variantSection) {
+                variantSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
             } else {
-              addToCart({
-                product_id: String(product.id),
-                title: product.title,
-                price: Number(product.price),
-                brand: product.brand,
-                quantity: 1,
-                image_url: imageUrl,
-              });
+              addToCart(buildCartPayload(product));
               openCart();
             }
           }}

@@ -12,7 +12,7 @@ export function ImageGallery({ images, title }: { images: string[], title: strin
   return (
     <div className="flex flex-col gap-4">
       <div className="aspect-square relative overflow-hidden rounded-2xl bg-muted border shadow-sm">
-        <Image 
+        <Image unoptimized 
           src={displayImages[currentIndex]} 
           alt={title}
           fill
@@ -21,17 +21,17 @@ export function ImageGallery({ images, title }: { images: string[], title: strin
         />
       </div>
       {displayImages.length > 1 && (
-        <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+        <div className="flex sm:grid sm:grid-cols-5 gap-2 overflow-x-auto snap-x snap-mandatory pb-2 scrollbar-hide">
           {displayImages.map((img, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
               className={cn(
-                "aspect-square rounded-md overflow-hidden border-2 transition-all",
+                "relative flex-shrink-0 w-20 sm:w-auto aspect-square rounded-md overflow-hidden border-2 transition-all snap-start",
                 currentIndex === idx ? "border-primary" : "border-transparent hover:border-primary/50"
               )}
             >
-              <Image src={img} alt={`${title} ${idx}`} fill sizes="25vw" className="object-cover" />
+              <Image unoptimized src={img} alt={`${title} ${idx}`} fill sizes="25vw" className="object-cover" />
             </button>
           ))}
         </div>

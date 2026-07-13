@@ -3,6 +3,7 @@
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
+import { buildCartPayload } from "@/lib/shop-utils";
 import Image from "next/image";
 import "./LuxereenCarousel.css";
 
@@ -70,25 +71,7 @@ function buildCarouselSlides(products: Product[]): { slides: CarouselSlide[]; is
   };
 }
 
-function buildCartPayload(product: Product) {
-  const defaultColor = product.color_options ? product.color_options.split(",")[0].trim() : "";
-  const defaultSize = product.size_matrix ? product.size_matrix.split(",")[0].trim() : "";
-  const defaultAddon = product.interactive_addons ? product.interactive_addons.split(",")[0].trim() : "";
-  const priceValue = Number(product.price) || 0;
-
-  return {
-    product_id: String(product.id),
-    title: product.title,
-    price: priceValue,
-    brand: product.brand || "luxereen_wears",
-    image_url: product.image_urls?.[0] || "",
-    quantity: 1,
-    selected_color: defaultColor,
-    selected_size: defaultSize,
-    selected_addon: defaultAddon,
-    custom_measurement: "",
-  };
-}
+// Removed local buildCartPayload
 
 function isInteractiveTarget(target: EventTarget | null) {
   return Boolean((target as HTMLElement | null)?.closest("a, button, input, textarea, select, label"));
@@ -108,6 +91,9 @@ const CarouselInstance = memo(function CarouselInstance({
   const pauserRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isCompactRef = useRef(isCompact);
   isCompactRef.current = isCompact;
+  
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const getSlides = useCallback(() => Array.from(listRef.current?.querySelectorAll(".carousel__item") || []), []);
 
@@ -241,12 +227,42 @@ const CarouselInstance = memo(function CarouselInstance({
       }
     };
 
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.changedTouches[0].screenX;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      touchEndX.current = e.changedTouches[0].screenX;
+    };
+
+    const handleTouchEnd = () => {
+      if (touchStartX.current !== null && touchEndX.current !== null) {
+        const diff = touchStartX.current - touchEndX.current;
+        if (Math.abs(diff) > 50) {
+          pauseAuto();
+          if (diff > 0) {
+            nextSlide();
+          } else {
+            prevSlide();
+          }
+        }
+      }
+      touchStartX.current = null;
+      touchEndX.current = null;
+    };
+
     list.addEventListener("focusin", handleSlideFocus);
     list.addEventListener("keyup", handleSlideKey);
+    list.addEventListener("touchstart", handleTouchStart, { passive: true });
+    list.addEventListener("touchmove", handleTouchMove, { passive: true });
+    list.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       list.removeEventListener("focusin", handleSlideFocus);
       list.removeEventListener("keyup", handleSlideKey);
+      list.removeEventListener("touchstart", handleTouchStart);
+      list.removeEventListener("touchmove", handleTouchMove);
+      list.removeEventListener("touchend", handleTouchEnd);
     };
   }, [activateSlide, getSlideIndex, nextSlide, pauseAuto, prevSlide]);
 
@@ -301,7 +317,7 @@ const CarouselInstance = memo(function CarouselInstance({
                 onClick={handleImageClick}
               >
                 {imageUrl ? (
-                  <Image src={imageUrl} alt={product.title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover" />
+                  <Image unoptimized src={imageUrl} alt={product.title} fill sizes="(max-width: 768px) 50vw, 30vw" className="object-cover" />
                 ) : (
                   <div className="carousel__image-placeholder" aria-hidden="true" />
                 )}

@@ -55,7 +55,7 @@ export function HeroCarousel({ desktopBanner, mobileBanner }: { desktopBanner: B
           {desktopBanner.media_type === 'video' ? (
             <video src={desktopBanner.media_url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
           ) : (
-            <Image fill src={desktopBanner.media_url} alt={desktopBanner.title} priority quality={100} className="object-cover" />
+            <Image unoptimized fill src={desktopBanner.media_url} alt={desktopBanner.title} priority quality={100} className="object-cover" />
           )}
         </motion.div>
       ) : (
@@ -74,7 +74,7 @@ export function HeroCarousel({ desktopBanner, mobileBanner }: { desktopBanner: B
           {mobileBanner.media_type === 'video' ? (
             <video src={mobileBanner.media_url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
           ) : (
-            <Image fill src={mobileBanner.media_url} alt={mobileBanner.title} priority quality={100} className="object-cover" />
+            <Image unoptimized fill src={mobileBanner.media_url} alt={mobileBanner.title} priority quality={100} className="object-cover" />
           )}
         </motion.div>
       ) : (
