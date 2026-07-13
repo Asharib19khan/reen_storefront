@@ -560,7 +560,7 @@ export function CheckoutClient({ paymentDetails }: { paymentDetails: string }) {
           <div className="flex flex-col gap-6 mb-6">
             {items.map((item) => (
               <div key={item.cart_item_id} className="flex gap-4">
-                <div className="w-20 h-20 rounded-md bg-muted overflow-hidden shrink-0 border">
+                <div className="relative w-20 h-20 rounded-md bg-muted overflow-hidden shrink-0 border">
                   <Image unoptimized src={item.image_url} alt={item.title} fill sizes="80px" className="object-cover" />
                 </div>
                 <div className="flex-1 text-sm">
